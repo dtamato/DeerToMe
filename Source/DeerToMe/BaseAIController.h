@@ -15,11 +15,11 @@ class DEERTOME_API ABaseAIController : public AAIController
 
 public:
 	UPROPERTY(EditDefaultsOnly)
-		UBlackboardComponent* DeerBlackboard;
+		UBlackboardComponent* ControllerBlackboard;
 
 	/* Cached BT component */
 	UPROPERTY(EditDefaultsOnly)
-		UBehaviorTreeComponent* DeerBehaviourTree;
+		UBehaviorTreeComponent* ControllerBehaviorTree;
 public:
 
 	//Possess a character
@@ -33,8 +33,8 @@ public:
 
 public:
 	/** Returns BlackboardComp subobject **/
-	FORCEINLINE UBlackboardComponent* GetBlackboardComp() const { return DeerBlackboard; }
+	FORCEINLINE UBlackboardComponent* GetBlackboardComp() const { return ControllerBlackboard; }
 	/** Returns BehaviorComp subobject **/
-	FORCEINLINE UBehaviorTreeComponent* GetBehaviorComp() const { return DeerBehaviourTree; }
+	FORCEINLINE UBehaviorTreeComponent* GetBehaviorComp() const { return ControllerBehaviorTree; }
 	
 };

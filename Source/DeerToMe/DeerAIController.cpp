@@ -8,9 +8,9 @@
 
 ADeerAIController::ADeerAIController()
 {
-	DeerBlackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
+	ControllerBlackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard"));
 
-	DeerBehaviourTree = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviourTree"));
+	ControllerBehaviorTree = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviourTree"));
 
 }
 
@@ -21,8 +21,8 @@ void ADeerAIController::Possess(APawn* InPawn)
 	ADeerAI* thisDeer = Cast<ADeerAI>(InPawn);
 	if (thisDeer && thisDeer->DeerBehaviour)
 	{
-		DeerBlackboard->InitializeBlackboard(*thisDeer->DeerBehaviour->BlackboardAsset);
-		DeerBehaviourTree->StartTree(*thisDeer->DeerBehaviour);
+		ControllerBlackboard->InitializeBlackboard(*thisDeer->DeerBehaviour->BlackboardAsset);
+		ControllerBehaviorTree->StartTree(*thisDeer->DeerBehaviour);
 	}
 
 }

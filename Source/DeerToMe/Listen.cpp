@@ -21,20 +21,15 @@ EBTNodeResult::Type UListen::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint
 		return EBTNodeResult::Failed;
 	}
 
-	for (TActorIterator<ADeerAI> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	ADeerAIController* NewDeer = Cast<ADeerAIController>(OwnerComp.GetAIOwner());
+	if (NewDeer)
 	{
-		ADeerAI* NewDeer = *ActorItr;
-		if (NewDeer && NewDeer->HeardDeerCall == true)
-		{	
-			//This is for the setting of the AI to find the player
-			ADeerToMeCharacter* DeerPlayer = NewDeer->PlayerCharacter;
+		ADeerAI* DeerController = Cast<ADeerAI>(NewDeer->GetCharacter());
 
-			bool DeerCallHeard = NewDeer->InRangeOfDeerCall;
-			if (NewDeer->InRangeOfDeerCall == true)
-			{
-				OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerKey, DeerPlayer);
-				return EBTNodeResult::Succeeded;
-			}
+		if (DeerController && DeerController->HeardDeerCall)
+		{
+			OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerKey, DeerController->PlayerCharacter);
+			return EBTNodeResult::Succeeded;
 		}
 	}
 	return EBTNodeResult::Failed;
