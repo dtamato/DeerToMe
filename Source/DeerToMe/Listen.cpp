@@ -32,7 +32,7 @@ EBTNodeResult::Type UListen::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint
 			bool DeerCallHeard = NewDeer->InRangeOfDeerCall;
 			if (NewDeer->InRangeOfDeerCall == true)
 			{
-				OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerKey, DeerPlayer);
+				// OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerKey, DeerPlayer);
 				return EBTNodeResult::Succeeded;
 			}
 		}
