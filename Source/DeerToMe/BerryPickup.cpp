@@ -39,12 +39,14 @@ void ABerryPickup::WasCollected_Implementation() {
 
 void ABerryPickup::OpenUpgradeMenu() {
 
-	UE_LOG(LogClass, Log, TEXT("OH HERRO."));
 	if (UpgradeWidgetClass != nullptr) {
+		
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), UpgradeWidgetClass);
+		
 		if (CurrentWidget != nullptr) {
-			UE_LOG(LogClass, Log, TEXT("Upgrade menUUU."));
+						
 			CurrentWidget->AddToViewport();
+			CurrentWidget->SetKeyboardFocus();
 		}
 	}
 }
