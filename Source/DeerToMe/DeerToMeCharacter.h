@@ -42,6 +42,12 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float num;
 
+	UPROPERTY(EditDefaultsOnly)
+	float JumpTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float JumpWaitTime;
+
 	UFUNCTION()
 	void CallDeer();
 
@@ -70,6 +76,10 @@ public:
 	// Accessor for character speed
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsEating();
+
+	// Accessor for character speed
+	UFUNCTION(BlueprintPure, Category = "Power")
+		bool GetIsJumping();
 
 	/** Toggle the players speed to a run or a walk */
 	void TogglePlayerRun();
@@ -150,6 +160,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		bool bIsEating;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
+		bool bIsJumping;
+
 	UPROPERTY(EditDefaultsOnly)
 		float EatTimer;
 
@@ -161,7 +174,28 @@ protected:
 private:
 	// Current poweer level of the character
 	UPROPERTY(VisibleAnywhere, Category = "Power")
-		float CharacterStamina;
+	float CharacterStamina;
+
+	UPROPERTY()
+	bool bCheckJump;
+
+	UPROPERTY()
+	bool bCheckRun;
+
+	UFUNCTION()
+	void StartDeerJump();
+	
+	UFUNCTION()
+	void StopDeerJump();
+
+	UFUNCTION()
+	void RunDeerJump(float DeltaTime);
+
+	UFUNCTION()
+	void EatGrass(float DeltaTime);
+
+	UFUNCTION()
+	void CheckJump(float DeltaTime);
 
 public:
 	/** Returns CameraBoom subobject **/

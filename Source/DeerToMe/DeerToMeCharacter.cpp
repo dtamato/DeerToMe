@@ -57,12 +57,21 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 
 	// set the dependence of the speed on the power level
 	BaseSpeed = 10.0f;
-	RunSpeed = 5.0f;
-	WalkSpeed = 0.1f;
+	RunSpeed = 0.05f;
+	WalkSpeed = 0.01f;
 	SpeedFactor = WalkSpeed;
-	bIsRunning = false;
+	
+	JumpTimer = 0;
+	JumpWaitTime = 1;
+	
 	EatTimer = 0;
 	MaxEatTime = 2;
+
+	bIsRunning = false;
+	bIsJumping = false;
+	bCheckJump = false;
+	bCheckRun = false;
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
@@ -74,8 +83,8 @@ void ADeerToMeCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 {
 	// Set up gameplay key bindings
 	check(InputComponent);
-	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	InputComponent->BindAction("Jump", IE_Pressed, this, &ADeerToMeCharacter::StartDeerJump);
+	// InputComponent->BindAction("Jump", IE_Released, this, &ADeerToMeCharacter::StopDeerJump);
 
 	InputComponent->BindAction("CallOut", IE_Pressed, this, &ADeerToMeCharacter::CallDeer);
 
@@ -131,13 +140,16 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 	}
 
 	if (bIsEating == true) {
-		EatTimer += DeltaTime;
-
-		if (EatTimer >= MaxEatTime) { 
-			EatTimer = 0;
-			bIsEating = false; 
-		}
+		EatGrass(DeltaTime);
 	}
+
+	if (bIsJumping == true) {
+		RunDeerJump(DeltaTime);
+		CheckJump(DeltaTime);
+	}
+
+	if (GetCharacterMovement()->Velocity.Size() > 550) { bIsRunning = true; }
+	else { bIsRunning = false; }
 }
 
 
@@ -146,6 +158,7 @@ void ADeerToMeCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Loc
 	// jump, but only on the first touch
 	if (FingerIndex == ETouchIndex::Touch1)
 	{
+		bIsJumping = true;
 		Jump();
 	}
 }
@@ -172,7 +185,7 @@ void ADeerToMeCharacter::LookUpAtRate(float Rate)
 
 void ADeerToMeCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f) && !bIsEating)
+	if ((Controller != NULL) && (Value != 0.0f) && !bIsEating /*&& !bIsJumping*/)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -180,6 +193,9 @@ void ADeerToMeCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		if (bIsJumping) { Value *= 0.5; }
+
 		AddMovementInput(Direction, Value);
 	}
 }
@@ -249,15 +265,17 @@ bool ADeerToMeCharacter::GetIsEating() {
 	return bIsEating;
 }
 
+bool ADeerToMeCharacter::GetIsJumping() {
+	return bIsJumping;
+}
+
 void ADeerToMeCharacter::TogglePlayerRun() {
 	UE_LOG(LogTemp, Warning, TEXT("Toggling Player Speed"));
 	if (bIsRunning) {
 		SpeedFactor = WalkSpeed;
-		bIsRunning = false;
 	}
 	else {
 		SpeedFactor = RunSpeed;
-		bIsRunning = true;
 	}
 }
 
@@ -265,9 +283,8 @@ void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 	//Change power
 	CharacterStamina = CharacterStamina + StanimaChange;
 	// Chnage speed based on power
-	GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * CharacterStamina;
+	GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + (SpeedFactor * CharacterStamina * 5);
 	// Call visual effect, audio and animation
-	// PowerChangeEffect();
 }
 
 void ADeerToMeCharacter::RefillStamina() {
@@ -276,3 +293,45 @@ void ADeerToMeCharacter::RefillStamina() {
 	else SpeedFactor = WalkSpeed;
 }
 
+void ADeerToMeCharacter::StartDeerJump() {
+	if (GetCharacterMovement()->Velocity.Size() <= 700) {
+		bIsJumping = true;
+	}
+}
+
+void ADeerToMeCharacter::StopDeerJump() {
+	bCheckJump = false;
+	bIsJumping = false;
+	StopJumping();
+}
+
+void ADeerToMeCharacter::RunDeerJump(float DeltaTime) {
+	
+	// UE_LOG(LogClass, Log, TEXT("increasing wait time"));
+	JumpTimer += DeltaTime;
+	if (JumpTimer >= JumpWaitTime) {
+		Jump();
+		bCheckJump = true;
+	}
+}
+
+void ADeerToMeCharacter::EatGrass(float DeltaTime) {
+	EatTimer += DeltaTime;
+
+	if (EatTimer >= MaxEatTime) {
+		EatTimer = 0;
+		bIsEating = false;
+	}
+}
+
+void ADeerToMeCharacter::CheckJump(float DeltaTime) {
+	if (bCheckJump) {
+		JumpTimer += DeltaTime;
+		if (JumpTimer >= JumpWaitTime) {
+			if (abs((long)GetCharacterMovement()->Velocity.Z) == 0) {
+				JumpTimer = 0;
+				StopDeerJump();
+			}
+		}
+	}
+}

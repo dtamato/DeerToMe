@@ -13,14 +13,14 @@
 ADeerToMeGameMode::ADeerToMeGameMode()
 {
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/DeerToMePlayer"));
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 
 	// Base deacy Rate
-	MinDecayRate = 0.005f;
+	MinDecayRate = 0.05f;
 	MaxDecayRate = 0.1f;
 	DecayRate = MinDecayRate;
 	MaxStamina = 100;
@@ -28,7 +28,6 @@ ADeerToMeGameMode::ADeerToMeGameMode()
 
 void ADeerToMeGameMode::BeginPlay() {
 	Super::BeginPlay();
-	// SetCurrentState(EBatteryPlayState::EPlaying);
 
 	if (HUDWidgetClass != nullptr) {
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
@@ -50,7 +49,6 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 		if (CharacterVelocity.Size() > 0) {
 
 			// if our power is greater than needed to win, set the gaem state to won
-			// if (MyCharacter->GetCurrentPower() > PowerToWin) { SetCurrentState(EBatteryPlayState::EWon); }
 			MaxStamina = (MyCharacter->GetInitilaStamina());
 
 			// Check to see if the player is running or walking and adjust the decay accordingly
@@ -59,7 +57,6 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 
 			// If the character still has power decrease it gradually using DecayRate
 			if (MyCharacter->GetCurrentStamina() > 0.3f) { MyCharacter->UpdateStamina(-DeltaTime * DecayRate * (MyCharacter->GetInitilaStamina())); }
-			
 		}
 	}
 }
