@@ -237,6 +237,7 @@ void ADeerToMeCharacter::CollectPickups() {
 			AGrassPickup* TestGrass = Cast<AGrassPickup>(TestPickup);
 			if (TestGrass) {
 				// Increase the collected power
+				UE_LOG(LogTemp, Warning, TEXT("Eating"));
 				CollectedStamina += TestGrass->GetStamina();
 			}
 			// Deactivate the Pickup
