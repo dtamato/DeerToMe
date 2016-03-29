@@ -9,6 +9,9 @@
 AHunterAI::AHunterAI()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	GunShotAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
+	GunShotAudio->AttachTo(RootComponent);
+
 }
 
 // Called when the game starts or when spawned
@@ -18,7 +21,6 @@ void AHunterAI::BeginPlay()
 
 	for (TActorIterator<ADeerToMeCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		// Same as with the Object Iterator, access the subclass instance with the * or -> operators.
 		ADeerToMeCharacter* TestCharacter = Cast<ADeerToMeCharacter>(*ActorItr);
 		if (TestCharacter)
 		{
@@ -38,4 +40,3 @@ void AHunterAI::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 	Super::SetupPlayerInputComponent(InputComponent);
 
 }
-

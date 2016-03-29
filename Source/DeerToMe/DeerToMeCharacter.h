@@ -24,6 +24,9 @@ class ADeerToMeCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* CollectionSphere;
 
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* BloodParticle;
+
 public:
 	ADeerToMeCharacter();
 
@@ -89,6 +92,12 @@ public:
 
 	/** Added to refill the stamina of the deer when testing */
 	void RefillStamina();
+
+	UFUNCTION()
+	void SetDeerStamina(float NewStamina);
+
+	UFUNCTION()
+	void SpawnBlood();
 
 protected:
 
