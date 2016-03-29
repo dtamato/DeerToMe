@@ -19,16 +19,14 @@ EBTNodeResult::Type UHunterDistanceToDeerCheckTask::ExecuteTask(UBehaviorTreeCom
 	AHunterAIController* NewHunter = Cast<AHunterAIController>(OwnerComp.GetAIOwner());
 	if (NewHunter)
 	{
-		AHunterAI* HunterController = Cast<AHunterAI>(NewHunter->GetCharacter());		
+		AHunterAI* HunterController = Cast<AHunterAI>(NewHunter->GetCharacter());
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerKey, HunterController->PlayerCharacter);
 
 		if (HunterController && HunterController->GetDistanceTo(HunterController->PlayerCharacter) <= 500.0f)
 		{
-			if (InLineOfSight(HunterController, HunterController->PlayerCharacter) && HunterController->PlayerCharacter->GetCurrentStamina() > 0.0f)
+			if (InLineOfSight(HunterController, HunterController->PlayerCharacter))
 			{
-				HunterController->PlayGunSound();
-				HunterController->PlayerCharacter->SetDeerStamina(0.0);
-				HunterController->PlayerCharacter->SpawnBlood();
+				//do kill here
 				return EBTNodeResult::Succeeded;
 			}
 		}
@@ -49,6 +47,7 @@ bool UHunterDistanceToDeerCheckTask::InLineOfSight(AHunterAI* Target1, ADeerToMe
 
 	if (Hit.GetActor())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("In range for the kill!"));
 		return true;
 	}
 	return false;

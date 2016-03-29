@@ -335,15 +335,3 @@ void ADeerToMeCharacter::CheckJump(float DeltaTime) {
 		}
 	}
 }
-
-void ADeerToMeCharacter::SpawnBlood()
-{
-	AEmitter* ExplosionEmitter = GetWorld()->SpawnActor<AEmitter>(GetActorLocation(), FRotator::ZeroRotator);
-	ExplosionEmitter->SetActorRelativeScale3D(FVector(.2f, .2f, .2f));
-	ExplosionEmitter->SetTemplate(BloodParticle);
-}
-
-void ADeerToMeCharacter::SetDeerStamina(float NewStamina)
-{
-	InitialStamina = NewStamina;
-}

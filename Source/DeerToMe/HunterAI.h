@@ -3,7 +3,6 @@
 #pragma once
 
 #include "GameFramework/Character.h"
-//#include "Runtime/Engine/Classes/Components/AudioComponent.h"
 #include "DeerToMeCharacter.h"
 #include "HunterAI.generated.h"
 
@@ -25,9 +24,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayGunSound();
-
 public:
 	UPROPERTY(EditAnywhere, Category = Behavior)
 	class UBehaviorTree* HunterBehaviour;
@@ -36,11 +32,6 @@ public:
 	class UBlackboardComponent* HunterBlackboard;
 
 	UPROPERTY(EditDefaultsOnly)
-	ADeerToMeCharacter* PlayerCharacter;
-
-	UPROPERTY(EditAnywhere)
-	UAudioComponent* GunShotAudio;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* GunSound;
+		ADeerToMeCharacter* PlayerCharacter;
+	
 };

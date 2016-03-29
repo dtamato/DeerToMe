@@ -12,8 +12,6 @@ AHunterAIController::AHunterAIController()
 
 	ControllerBehaviorTree = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviourTree"));
 
-	
-
 }
 
 void AHunterAIController::Possess(APawn* InPawn)
@@ -27,8 +25,6 @@ void AHunterAIController::Possess(APawn* InPawn)
 		ControllerBehaviorTree->StartTree(*thisHuner->HunterBehaviour);
 	}
 }
-
-
 
 
 
