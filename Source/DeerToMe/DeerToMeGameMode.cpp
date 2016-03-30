@@ -20,8 +20,8 @@ ADeerToMeGameMode::ADeerToMeGameMode()
 	}
 
 	// Base deacy Rate
-	MinDecayRate = 0.05f;
-	MaxDecayRate = 0.1f;
+	MinDecayRate = 0.005f;
+	MaxDecayRate = 0.01f;
 	DecayRate = MinDecayRate;
 	MaxStamina = 100;
 }
