@@ -57,8 +57,8 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 
 	// set the dependence of the speed on the power level
 	BaseSpeed = 10.0f;
-	RunSpeed = 0.05f;
-	WalkSpeed = 0.01f;
+	RunSpeed = 1.0f;
+	WalkSpeed = 0.1f;
 	SpeedFactor = WalkSpeed;
 	
 	JumpTimer = 0;
@@ -148,8 +148,10 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		CheckJump(DeltaTime);
 	}
 
-	if (GetCharacterMovement()->Velocity.Size() > 550) { bIsRunning = true; }
+	if (GetCharacterMovement()->Velocity.GetAbs().Size() * 0.00001 > 100050) { bIsRunning = true; }
 	else { bIsRunning = false; }
+
+	UE_LOG(LogTemp, Warning, TEXT("Player Speed : %i"), GetCharacterMovement()->Velocity.Size());
 }
 
 
@@ -272,11 +274,11 @@ bool ADeerToMeCharacter::GetIsJumping() {
 
 void ADeerToMeCharacter::TogglePlayerRun() {
 	UE_LOG(LogTemp, Warning, TEXT("Toggling Player Speed"));
-	if (bIsRunning) {
-		SpeedFactor = WalkSpeed;
+	if (GetCharacterMovement()->Velocity.GetAbs().Size() < 1150) {
+		SpeedFactor = RunSpeed;
 	}
 	else {
-		SpeedFactor = RunSpeed;
+		SpeedFactor = WalkSpeed;
 	}
 }
 
@@ -284,7 +286,7 @@ void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 	//Change power
 	CharacterStamina = CharacterStamina + StanimaChange;
 	// Chnage speed based on power
-	GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + (SpeedFactor * CharacterStamina * 5);
+	GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + (SpeedFactor * CharacterStamina * 2);
 	// Call visual effect, audio and animation
 }
 
@@ -295,7 +297,7 @@ void ADeerToMeCharacter::RefillStamina() {
 }
 
 void ADeerToMeCharacter::StartDeerJump() {
-	if (GetCharacterMovement()->Velocity.Size() <= 700) {
+	if (GetCharacterMovement()->Velocity.Size() <= 1000) {
 		bIsJumping = true;
 	}
 }

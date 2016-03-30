@@ -7,7 +7,7 @@ AGrassPickup::AGrassPickup() {
 	GetMesh()->SetSimulatePhysics(true);
 
 	// The amount of stamina the grass will provide the deer
-	GrassStamina = 1000.0f;
+	GrassStamina = 10000.0f;
 	EatTimer = 0;
 	MaxEatTimer = 2;
 	bCanEat = false;
