@@ -8,7 +8,7 @@ ABerryPickup::ABerryPickup() {
 	GetMesh()->SetSimulatePhysics(true);
 	
 	EatTimer = 0;
-	MaxEatTimer = 2;
+	MaxEatTimer = 2.5f;
 	bCanEat = false;
 }
 
@@ -33,6 +33,7 @@ void ABerryPickup::WasCollected_Implementation() {
 	if (bCanEat == false) {
 
 		Super::WasCollected_Implementation();
+		audioComponent->Play();
 		bCanEat = true;
 	}
 }

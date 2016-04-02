@@ -35,6 +35,11 @@ APickup::APickup()
 
 	// The brightness of the light when sphere is entered
 	DesiredLightIntensity = 3000.0f;
+
+	// Create the audio component
+	audioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
+	//audioComponent->SetSound(audioFile);
+	audioComponent->AttachParent = RootComponent;
 }
 
 // Called when the game starts or when spawned

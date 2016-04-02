@@ -37,5 +37,4 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 		bool bCanEat;
-	
 };

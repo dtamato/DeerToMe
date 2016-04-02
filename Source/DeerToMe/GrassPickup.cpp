@@ -9,7 +9,7 @@ AGrassPickup::AGrassPickup() {
 	// The amount of stamina the grass will provide the deer
 	GrassStamina = 10000.0f;
 	EatTimer = 0;
-	MaxEatTimer = 2;
+	MaxEatTimer = 2.5f;
 	bCanEat = false;
 }
 
@@ -30,6 +30,7 @@ void AGrassPickup::WasCollected_Implementation() {
 	if (bCanEat == false) {
 		// Use the behaviour derrived from the base pickup
 		Super::WasCollected_Implementation();
+		audioComponent->Play();
 		// Put in a delay before destroying the pickup
 		bCanEat = true;
 	}
