@@ -81,6 +81,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsJumping();
 
+	UFUNCTION(BlueprintPure, Category = "Camera")
+		UCameraComponent* GetPlayerCamera();
+
 	/** Toggle the players speed to a run or a walk */
 	void TogglePlayerRun();
 

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DeerToMe.h"
+#include "Engine.h"
 #include "EngineUtils.h"
 #include "HunterAI.h"
 
@@ -9,6 +10,8 @@
 AHunterAI::AHunterAI()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	MaxDistanceFromPlayer = 10000;
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +33,16 @@ void AHunterAI::BeginPlay()
 void AHunterAI::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	DistanceFromPlayer = GetDistanceTo(PlayerCharacter);
+	
+	if (DistanceFromPlayer <= MaxDistanceFromPlayer) {
+		// Set Vingette intenisty based off of the values 
+		VingetteIntensity = DistanceFromPlayer / MaxDistanceFromPlayer;
+		
+		FString VIFloat = FString::SanitizeFloat(VingetteIntensity);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *VIFloat);
+	}
 }
 
 // Called to bind functionality to input
@@ -39,3 +52,6 @@ void AHunterAI::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 
 }
 
+float AHunterAI::GetVingetteIntensity() {
+	return VingetteIntensity;
+}

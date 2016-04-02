@@ -21,5 +21,4 @@ public:
 
 	FName Player = "Player";
 	
-	
 };
