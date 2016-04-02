@@ -151,7 +151,7 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 	if (GetCharacterMovement()->Velocity.GetAbs().Size() * 0.00001 > 100050) { bIsRunning = true; }
 	else { bIsRunning = false; }
 
-	UE_LOG(LogTemp, Warning, TEXT("Player Speed : %i"), GetCharacterMovement()->Velocity.Size());
+	// UE_LOG(LogTemp, Warning, TEXT("Player Speed : %i"), GetCharacterMovement()->Velocity.Size());
 }
 
 
@@ -270,6 +270,10 @@ bool ADeerToMeCharacter::GetIsEating() {
 
 bool ADeerToMeCharacter::GetIsJumping() {
 	return bIsJumping;
+}
+
+UCameraComponent* ADeerToMeCharacter::GetPlayerCamera() {
+	return FollowCamera;
 }
 
 void ADeerToMeCharacter::TogglePlayerRun() {

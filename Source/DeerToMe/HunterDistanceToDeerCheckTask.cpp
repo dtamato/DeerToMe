@@ -22,8 +22,17 @@ EBTNodeResult::Type UHunterDistanceToDeerCheckTask::ExecuteTask(UBehaviorTreeCom
 		AHunterAI* HunterController = Cast<AHunterAI>(NewHunter->GetCharacter());
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerKey, HunterController->PlayerCharacter);
 
-		if (HunterController && HunterController->GetDistanceTo(HunterController->PlayerCharacter) <= 500.0f)
+		/*if (HunterController && HunterController->GetDistanceTo(HunterController->PlayerCharacter) <= 50000.0f)
 		{
+			float dist = HunterController->GetDistanceTo(HunterController->PlayerCharacter);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::FromInt(dist));
+		}*/
+
+		if (HunterController && HunterController->GetDistanceTo(HunterController->PlayerCharacter) <= 500.0f)
+		{	
+			//float dist = HunterController->GetDistanceTo(HunterController->PlayerCharacter);
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::FromInt(dist));
+
 			if (InLineOfSight(HunterController, HunterController->PlayerCharacter))
 			{
 				//do kill here

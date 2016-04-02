@@ -19,5 +19,4 @@ public:
 public:
 	//Deer Possession overriden function from base AIController
 	void Possess(APawn* InPawn) override;
-	
 };

@@ -31,7 +31,19 @@ public:
 	UPROPERTY(EditAnywhere, Category = Behavior)
 	class UBlackboardComponent* HunterBlackboard;
 
-	UPROPERTY(EditDefaultsOnly)
-		ADeerToMeCharacter* PlayerCharacter;
+	UPROPERTY(EditAnywhere, Category = Behavior)
+	float MaxDistanceFromPlayer;
 	
+	UPROPERTY(EditAnywhere, Category = Behavior)
+	float DistanceFromPlayer;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float VingetteIntensity;
+
+	UPROPERTY(EditDefaultsOnly)
+	ADeerToMeCharacter* PlayerCharacter;
+	
+	// Accessor for InitialPower
+	UFUNCTION(BlueprintPure, Category = "Camera")
+	float GetVingetteIntensity();
 };
