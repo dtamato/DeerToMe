@@ -308,7 +308,7 @@ void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 
 	// Chnage speed based on power
 	if (!bIsRunning) {
-		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.25f);
+		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.1f);
 	}
 	else {
 		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor + RunBoost;
