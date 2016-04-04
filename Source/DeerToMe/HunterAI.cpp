@@ -37,11 +37,12 @@ void AHunterAI::Tick(float DeltaTime)
 	DistanceFromPlayer = GetDistanceTo(PlayerCharacter);
 	
 	if (DistanceFromPlayer <= MaxDistanceFromPlayer) {
-		// Set Vingette intenisty based off of the values 
-		VingetteIntensity = DistanceFromPlayer / MaxDistanceFromPlayer;
-		
+
+		ScreenColorIntensity = DistanceFromPlayer / MaxDistanceFromPlayer;
+		VingetteIntensity = 1 - ScreenColorIntensity;
+
 		FString VIFloat = FString::SanitizeFloat(VingetteIntensity);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *VIFloat);
+		// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *VIFloat);
 	}
 }
 

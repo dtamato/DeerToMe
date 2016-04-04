@@ -4,10 +4,10 @@
 #include "GrassPickup.h"
 
 AGrassPickup::AGrassPickup() {
-	GetMesh()->SetSimulatePhysics(true);
+	// GetMesh()->SetSimulatePhysics(true);
 
 	// The amount of stamina the grass will provide the deer
-	GrassStamina = 10000.0f;
+	GrassStamina = 10.0f;
 	EatTimer = 0;
 	MaxEatTimer = 2.5f;
 	bCanEat = false;

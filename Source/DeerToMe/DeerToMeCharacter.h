@@ -13,9 +13,8 @@ class ADeerToMeCharacter : public ACharacter
 	class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-
 
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* CallOutDistance;
@@ -65,21 +64,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Power")
 		float GetInitilaStamina();
 	
-	// Accessor for current power
 	UFUNCTION(BlueprintPure, Category = "Power")
 		float GetCurrentStamina();
 
-	// Accessor for character speed
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsRunning();
 
-	// Accessor for character speed
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsEating();
 
-	// Accessor for character speed
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsJumping();
+
+	UFUNCTION(BlueprintPure, Category = "Power")
+		bool GetIsStarving();
 
 	UFUNCTION(BlueprintPure, Category = "Camera")
 		UCameraComponent* GetPlayerCamera();
@@ -145,14 +143,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float BaseSpeed;
 
-	/** Max Speed of Character*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
-		float RunSpeed;
-
-	/** Min Speed of Character*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
-		float WalkSpeed;
-
 	/** Current Speed of character*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float CurrentSpeed;
@@ -166,11 +156,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		bool bIsJumping;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
+		bool bIsStarved;
+
 	UPROPERTY(EditDefaultsOnly)
 		float EatTimer;
 
 	UPROPERTY(EditDefaultsOnly)
 		float MaxEatTime;
+
+	UPROPERTY(EditDefaultsOnly)
+		float RunTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+		float MaxRunTime;
+
 	// UFUNCTION(BlueprintImplementableEvent, Category = "Power")
 	// 	void PowerChangeEffect();
 
@@ -178,6 +178,9 @@ private:
 	// Current poweer level of the character
 	UPROPERTY(VisibleAnywhere, Category = "Power")
 	float CharacterStamina;
+
+	UPROPERTY(VisibleAnywhere, Category = "Power")
+	float RunBoost;
 
 	UPROPERTY()
 	bool bCheckJump;

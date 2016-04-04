@@ -24,14 +24,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
 		float DecayRate;
 
-	// Max rate at which the character loses power
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
-		float MaxDecayRate;
-
-	// Min rate at which the character loses power
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
-		float MinDecayRate;
-
 	/**Power needed to win game */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float MaxStamina;

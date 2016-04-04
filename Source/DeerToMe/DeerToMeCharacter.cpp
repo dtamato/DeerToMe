@@ -52,15 +52,16 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	CollectionSphere->SetSphereRadius(100);
 
 	// Set a base power level for the character STAMINA
-	InitialStamina = 10000.f;
+	InitialStamina = 1000.0f;
 	CharacterStamina = InitialStamina;
 
 	// set the dependence of the speed on the power level
-	BaseSpeed = 10.0f;
-	RunSpeed = 1.0f;
-	WalkSpeed = 0.1f;
-	SpeedFactor = WalkSpeed;
-	
+	BaseSpeed = 100.0f;
+	SpeedFactor = 10;
+	RunTimer = 0;
+	MaxRunTime = 4;
+	RunBoost = 3000;
+
 	JumpTimer = 0;
 	JumpWaitTime = 1;
 	
@@ -71,6 +72,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	bIsJumping = false;
 	bCheckJump = false;
 	bCheckRun = false;
+	bIsStarved = false;
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -148,12 +150,17 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		CheckJump(DeltaTime);
 	}
 
-	if (GetCharacterMovement()->Velocity.GetAbs().Size() * 0.00001 > 100050) { bIsRunning = true; }
-	else { bIsRunning = false; }
+	if (bIsRunning) {
+		RunTimer += DeltaTime;
+		if (RunTimer >= MaxRunTime) {
+			bIsRunning = false;
+			RunTimer = 0;
+		}
+	}
 
-	// UE_LOG(LogTemp, Warning, TEXT("Player Speed : %i"), GetCharacterMovement()->Velocity.Size());
+	if (CharacterStamina <= 0) { bIsStarved = true; }
+
 }
-
 
 void ADeerToMeCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
@@ -187,7 +194,7 @@ void ADeerToMeCharacter::LookUpAtRate(float Rate)
 
 void ADeerToMeCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f) && !bIsEating /*&& !bIsJumping*/)
+	if ((Controller != NULL) && (Value != 0.0f) && !bIsEating && !bIsStarved)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -218,37 +225,39 @@ void ADeerToMeCharacter::MoveRight(float Value)
 }
 
 void ADeerToMeCharacter::CollectPickups() {
-	// Get all overlapping  actors and store then in an array
-	TArray<AActor*> CollectedActors;
-	CollectionSphere->GetOverlappingActors(CollectedActors);
+	if (CharacterStamina < InitialStamina - 10) {
+		// Get all overlapping  actors and store then in an array
+		TArray<AActor*> CollectedActors;
+		CollectionSphere->GetOverlappingActors(CollectedActors);
 
-	// Keep track of collected poewer
-	float CollectedStamina = 0;
+		// Keep track of collected poewer
+		float CollectedStamina = 0;
 
-	// this function loops though all of the pickups in the volume and refills the character power accordingly for each actor we collected 
-	for (int32 iCollected = 0; iCollected < CollectedActors.Num(); ++iCollected) {
-		// Cast the actor to APikcup
-		APickup* TestPickup = Cast<APickup>(CollectedActors[iCollected]);
-		// If the cast is successfula dn the pickup is valid and active
-		if (TestPickup && !TestPickup->IsPendingKill() && TestPickup->IsActive()) {
-			// Set eating boolean to true
-			bIsEating = true;
-			// Then call the pickups WasCollected function
-			TestPickup->WasCollected();
-			// Check to see if pickup is battery
-			AGrassPickup* TestGrass = Cast<AGrassPickup>(TestPickup);
-			if (TestGrass) {
-				// Increase the collected power
-				UE_LOG(LogTemp, Warning, TEXT("Eating"));
-				CollectedStamina += TestGrass->GetStamina();
+		// this function loops though all of the pickups in the volume and refills the character power accordingly for each actor we collected 
+		for (int32 iCollected = 0; iCollected < CollectedActors.Num(); ++iCollected) {
+			// Cast the actor to APikcup
+			APickup* TestPickup = Cast<APickup>(CollectedActors[iCollected]);
+			// If the cast is successfula dn the pickup is valid and active
+			if (TestPickup && !TestPickup->IsPendingKill() && TestPickup->IsActive()) {
+				// Set eating boolean to true
+				bIsEating = true;
+				// Then call the pickups WasCollected function
+				TestPickup->WasCollected();
+				// Check to see if pickup is battery
+				AGrassPickup* TestGrass = Cast<AGrassPickup>(TestPickup);
+				if (TestGrass) {
+					// Increase the collected power
+					UE_LOG(LogTemp, Warning, TEXT("Eating"));
+					CollectedStamina += TestGrass->GetStamina();
+				}
+				// Deactivate the Pickup
+				TestPickup->SetActive(false);
 			}
-			// Deactivate the Pickup
-			TestPickup->SetActive(false);
 		}
-	}
 
-	if (CollectedStamina > 0) {
-		UpdateStamina(CollectedStamina);
+		if (CollectedStamina > 0) {
+			UpdateStamina(CollectedStamina);
+		}
 	}
 }
 
@@ -272,36 +281,50 @@ bool ADeerToMeCharacter::GetIsJumping() {
 	return bIsJumping;
 }
 
+bool ADeerToMeCharacter::GetIsStarving() {
+	return bIsStarved;
+}
+
 UCameraComponent* ADeerToMeCharacter::GetPlayerCamera() {
 	return FollowCamera;
 }
 
 void ADeerToMeCharacter::TogglePlayerRun() {
 	UE_LOG(LogTemp, Warning, TEXT("Toggling Player Speed"));
-	if (GetCharacterMovement()->Velocity.GetAbs().Size() < 1150) {
-		SpeedFactor = RunSpeed;
-	}
-	else {
-		SpeedFactor = WalkSpeed;
-	}
+	// Check to see if the player still has half their stamina
+	if (CharacterStamina >= (InitialStamina * 0.3f) && !bIsRunning) {
+		// if they do allow them to run -- countdown in tick -- add in a timed variable
+		bIsRunning = true;
+		// Decrease their stamina by a quarter
+		CharacterStamina -= (InitialStamina * 0.25f);
+	}	
 }
 
 void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 	//Change power
 	CharacterStamina = CharacterStamina + StanimaChange;
+
+	if (CharacterStamina > InitialStamina) { CharacterStamina = InitialStamina; }
+
 	// Chnage speed based on power
-	GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + (SpeedFactor * CharacterStamina * 2);
+	if (!bIsRunning) {
+		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.25f);
+	}
+	else {
+		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor + RunBoost;
+	}
+
+	// UE_LOG(LogTemp, Warning, TEXT("Player Max Speed %f"), GetCharacterMovement()->MaxWalkSpeed);
 	// Call visual effect, audio and animation
 }
 
 void ADeerToMeCharacter::RefillStamina() {
 	CharacterStamina = InitialStamina;
-	if (bIsRunning) SpeedFactor = RunSpeed;
-	else SpeedFactor = WalkSpeed;
+	SpeedFactor = BaseSpeed;
 }
 
 void ADeerToMeCharacter::StartDeerJump() {
-	if (GetCharacterMovement()->Velocity.Size() <= 1000) {
+	if (GetCharacterMovement()->Velocity.Size() <= 5000) {
 		bIsJumping = true;
 	}
 }

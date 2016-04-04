@@ -20,9 +20,7 @@ ADeerToMeGameMode::ADeerToMeGameMode()
 	}
 
 	// Base deacy Rate
-	MinDecayRate = 0.005f;
-	MaxDecayRate = 0.01f;
-	DecayRate = MinDecayRate;
+	DecayRate = 0.01;
 	MaxStamina = 100;
 }
 
@@ -51,12 +49,8 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 			// if our power is greater than needed to win, set the gaem state to won
 			MaxStamina = (MyCharacter->GetInitilaStamina());
 
-			// Check to see if the player is running or walking and adjust the decay accordingly
-			if (MyCharacter->GetIsRunning()) { DecayRate = MaxDecayRate; }
-			else { DecayRate = MinDecayRate; }
-
 			// If the character still has power decrease it gradually using DecayRate
-			if (MyCharacter->GetCurrentStamina() > 0.3f) { MyCharacter->UpdateStamina(-DeltaTime * DecayRate * (MyCharacter->GetInitilaStamina())); }
+			if (MyCharacter->GetCurrentStamina() > 0.0f) { MyCharacter->UpdateStamina(-DeltaTime * DecayRate * MaxStamina); }
 		}
 	}
 }

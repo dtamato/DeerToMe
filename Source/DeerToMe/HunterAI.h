@@ -40,6 +40,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float VingetteIntensity;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float ScreenColorIntensity;
+
 	UPROPERTY(EditDefaultsOnly)
 	ADeerToMeCharacter* PlayerCharacter;
 	
