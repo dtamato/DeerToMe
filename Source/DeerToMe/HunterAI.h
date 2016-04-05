@@ -43,6 +43,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float ScreenColorIntensity;
 
+	bool bNotifiedUI;
+
 	UPROPERTY(EditDefaultsOnly)
 	ADeerToMeCharacter* PlayerCharacter;
 	

@@ -61,6 +61,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	RunTimer = 0;
 	MaxRunTime = 4;
 	RunBoost = 3000;
+	CollectedDeer = 0;
 
 	JumpTimer = 0;
 	JumpWaitTime = 1;
@@ -158,7 +159,10 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		}
 	}
 
-	if (CharacterStamina <= 0) { bIsStarved = true; }
+	if (CharacterStamina <= 0 && bIsStarved == false) { 
+		SetCurrentUIState(EUI_State::EUI_Starve); 
+		bIsStarved = true;
+	}
 
 }
 
@@ -249,6 +253,7 @@ void ADeerToMeCharacter::CollectPickups() {
 					// Increase the collected power
 					UE_LOG(LogTemp, Warning, TEXT("Eating"));
 					CollectedStamina += TestGrass->GetStamina();
+					SetCurrentUIState(EUI_State::EUI_ExitCollect);
 				}
 				// Deactivate the Pickup
 				TestPickup->SetActive(false);
@@ -283,6 +288,28 @@ bool ADeerToMeCharacter::GetIsJumping() {
 
 bool ADeerToMeCharacter::GetIsStarving() {
 	return bIsStarved;
+}
+
+EUI_State ADeerToMeCharacter::GetCurrentUIState() {
+	return CurrentUIState;
+}
+
+void ADeerToMeCharacter::SetCurrentUIState(EUI_State NewState) {
+	UE_LOG(LogTemp, Warning, TEXT("Setting player UI State"));
+	CurrentUIState = NewState;
+}
+
+void ADeerToMeCharacter::ResetCurrentUIState() {
+	UE_LOG(LogTemp, Warning, TEXT("resetting player UI State"));
+	CurrentUIState = EUI_State::EUI_None;
+}
+
+void ADeerToMeCharacter::IncreaseDeersCollected() {
+	CollectedDeer++;
+}
+
+uint8 ADeerToMeCharacter::GetDeersCollected() {
+	return CollectedDeer;
 }
 
 UCameraComponent* ADeerToMeCharacter::GetPlayerCamera() {

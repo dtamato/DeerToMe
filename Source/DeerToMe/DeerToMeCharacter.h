@@ -3,6 +3,19 @@
 #include "GameFramework/Character.h"
 #include "DeerToMeCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EUI_State {
+
+	EUI_None = 0,
+	EUI_EnterRun,
+	EUI_ExitRun,
+	EUI_EnterCollect,
+	EUI_ExitCollect,
+	EUI_EnterCallOut,
+	EUI_ExitCallOut,
+	EUI_Starve
+};
+
 UCLASS(config=Game)
 class ADeerToMeCharacter : public ACharacter
 {
@@ -78,6 +91,24 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsStarving();
+
+	/** Returns the current UI state*/
+	UFUNCTION(BlueprintPure, Category = "UI")
+		EUI_State GetCurrentUIState();
+
+	/** Sets a new UI state*/
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetCurrentUIState(EUI_State NewState);
+
+	/** Resets the UI state to none */
+	UFUNCTION(BlueprintCallable, Category = "UI")
+		void ResetCurrentUIState();
+
+	UFUNCTION()
+	void IncreaseDeersCollected();
+
+	UFUNCTION(BlueprintPure, Category = "UI")
+		uint8 GetDeersCollected();
 
 	UFUNCTION(BlueprintPure, Category = "Camera")
 		UCameraComponent* GetPlayerCamera();
@@ -188,6 +219,9 @@ private:
 	UPROPERTY()
 	bool bCheckRun;
 
+	UPROPERTY()
+	uint8 CollectedDeer;
+
 	UFUNCTION()
 	void StartDeerJump();
 	
@@ -202,6 +236,9 @@ private:
 
 	UFUNCTION()
 	void CheckJump(float DeltaTime);
+
+	// Keeps track of the cuurent UI state
+	EUI_State CurrentUIState;
 
 public:
 	/** Returns CameraBoom subobject **/

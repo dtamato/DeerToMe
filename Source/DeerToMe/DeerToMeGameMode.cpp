@@ -31,6 +31,7 @@ void ADeerToMeGameMode::BeginPlay() {
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 		if (CurrentWidget != nullptr) {
 			CurrentWidget->AddToViewport();
+			
 		}
 	}
 }

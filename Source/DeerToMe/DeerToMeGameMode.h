@@ -33,7 +33,7 @@ protected:
 		TSubclassOf<class UUserWidget> HUDWidgetClass;
 
 	/** the instance of the HUD*/
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
 	class UUserWidget* CurrentWidget;
 
 };

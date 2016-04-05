@@ -33,8 +33,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool InRangeOfDeerCall;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Particles")
 	bool HeardDeerCall;
+
+	UPROPERTY(EditAnywhere)
+	bool bIsCollected;
 	
 public:
 	UPROPERTY(EditAnywhere, Category = Behavior)

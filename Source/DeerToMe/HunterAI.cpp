@@ -12,6 +12,7 @@ AHunterAI::AHunterAI()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MaxDistanceFromPlayer = 10000;
+	bNotifiedUI = false;
 }
 
 // Called when the game starts or when spawned
@@ -37,12 +38,19 @@ void AHunterAI::Tick(float DeltaTime)
 	DistanceFromPlayer = GetDistanceTo(PlayerCharacter);
 	
 	if (DistanceFromPlayer <= MaxDistanceFromPlayer) {
-
+		if (PlayerCharacter->GetCurrentUIState() == EUI_State::EUI_None && bNotifiedUI == false) {
+			PlayerCharacter->SetCurrentUIState(EUI_State::EUI_EnterRun);
+			bNotifiedUI = true;
+		}
+		
 		ScreenColorIntensity = DistanceFromPlayer / MaxDistanceFromPlayer;
 		VingetteIntensity = 1 - ScreenColorIntensity;
-
-		FString VIFloat = FString::SanitizeFloat(VingetteIntensity);
-		// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *VIFloat);
+	}
+	else {
+		if (bNotifiedUI == true) {
+			PlayerCharacter->SetCurrentUIState(EUI_State::EUI_ExitRun);
+			bNotifiedUI = false;
+		}
 	}
 }
 

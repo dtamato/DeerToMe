@@ -84,6 +84,7 @@ void APickup::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent
 		
 		if (DeerCharacter && PickupLight->bVisible == false) {
 			UE_LOG(LogClass, Log, TEXT("On Overlap Begin Called."));
+			DeerCharacter->SetCurrentUIState(EUI_State::EUI_EnterCollect);
 			TogglePickupLight();
 		}
 	}
@@ -96,6 +97,7 @@ void APickup::OnOverlapEnd(class AActor* OtherActor, class UPrimitiveComponent* 
 
 		if (DeerCharacter && PickupLight->bVisible == true) {
 			UE_LOG(LogClass, Log, TEXT("On Overlap End Called."));
+			DeerCharacter->SetCurrentUIState(EUI_State::EUI_ExitCollect);
 			TogglePickupLight();
 		}
 	}
