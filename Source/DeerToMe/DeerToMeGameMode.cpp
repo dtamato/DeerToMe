@@ -27,13 +27,7 @@ ADeerToMeGameMode::ADeerToMeGameMode()
 void ADeerToMeGameMode::BeginPlay() {
 	Super::BeginPlay();
 
-	if (HUDWidgetClass != nullptr) {
-		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
-		if (CurrentWidget != nullptr) {
-			CurrentWidget->AddToViewport();
-			
-		}
-	}
+	bUIDisplayed = false;
 }
 
 void ADeerToMeGameMode::Tick(float DeltaTime) {
@@ -44,6 +38,17 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 	if (MyCharacter) {
 
 		FVector CharacterVelocity = MyCharacter->GetVelocity();
+
+		if (MyCharacter->GetGameStarted() == true && bUIDisplayed == false) {
+			bUIDisplayed = true;
+
+			if (HUDWidgetClass != nullptr) {
+				CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+				if (CurrentWidget != nullptr) {
+					CurrentWidget->AddToViewport();
+				}
+			}
+		}
 
 		if (CharacterVelocity.Size() > 0) {
 

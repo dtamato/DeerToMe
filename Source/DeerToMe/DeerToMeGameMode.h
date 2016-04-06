@@ -36,6 +36,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
 	class UUserWidget* CurrentWidget;
 
+	bool bUIDisplayed;
+
 };
 
 

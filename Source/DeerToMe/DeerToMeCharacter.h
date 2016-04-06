@@ -92,6 +92,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsStarving();
 
+	UFUNCTION(BlueprintPure, Category = "Power")
+		bool GetGameStarted();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetGameStarted(bool GameState);
+
 	/** Returns the current UI state*/
 	UFUNCTION(BlueprintPure, Category = "UI")
 		EUI_State GetCurrentUIState();
@@ -121,6 +127,11 @@ public:
 
 	/** Added to refill the stamina of the deer when testing */
 	void RefillStamina();
+
+	// Function to call when the deer is seraching for another deer
+	UFUNCTION(BlueprintNativeEvent)
+		void CalledDeer();
+	virtual void CalledDeer_Implementation();
 
 protected:
 
@@ -189,6 +200,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
 		bool bIsStarved;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
+		bool bGameStarted;
 
 	UPROPERTY(EditDefaultsOnly)
 		float EatTimer;

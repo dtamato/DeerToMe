@@ -74,6 +74,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	bCheckJump = false;
 	bCheckRun = false;
 	bIsStarved = false;
+	bGameStarted = false;
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -95,6 +96,7 @@ void ADeerToMeCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAction("Collect", IE_Pressed, this, &ADeerToMeCharacter::CollectPickups);
 	InputComponent->BindAction("AdjustSpeed", IE_Pressed, this, &ADeerToMeCharacter::TogglePlayerRun);
 	InputComponent->BindAction("RefillStamina", IE_Pressed, this, &ADeerToMeCharacter::RefillStamina);
+	InputComponent->BindAction("Look", IE_Pressed, this, &ADeerToMeCharacter::CalledDeer);
 
 	InputComponent->BindAxis("MoveForward", this, &ADeerToMeCharacter::MoveForward);
 	// InputComponent->BindAxis("MoveRight", this, &ADeerToMeCharacter::MoveRight);
@@ -290,6 +292,14 @@ bool ADeerToMeCharacter::GetIsStarving() {
 	return bIsStarved;
 }
 
+bool ADeerToMeCharacter::GetGameStarted() {
+	return bGameStarted;
+}
+
+void ADeerToMeCharacter::SetGameStarted(bool GameState) {
+	bGameStarted = GameState;
+}
+
 EUI_State ADeerToMeCharacter::GetCurrentUIState() {
 	return CurrentUIState;
 }
@@ -391,4 +401,9 @@ void ADeerToMeCharacter::CheckJump(float DeltaTime) {
 			}
 		}
 	}
+}
+
+void ADeerToMeCharacter::CalledDeer_Implementation() {
+	//Load a debug message
+	UE_LOG(LogClass, Log, TEXT("You have called %s"));
 }
