@@ -49,7 +49,7 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 
 			// if our power is greater than needed to win, set the gaem state to won
 			MaxStamina = (MyCharacter->GetInitilaStamina());
-
+			UE_LOG(LogTemp, Warning, TEXT("Decaying Stamina"));
 			// If the character still has power decrease it gradually using DecayRate
 			if (MyCharacter->GetCurrentStamina() > 0.0f) { MyCharacter->UpdateStamina(-DeltaTime * DecayRate * MaxStamina); }
 		}
