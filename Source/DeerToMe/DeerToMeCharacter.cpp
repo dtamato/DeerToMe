@@ -393,6 +393,11 @@ void ADeerToMeCharacter::RefillStamina() {
 	SpeedFactor = BaseSpeed;
 }
 
+void ADeerToMeCharacter::SetStamina(float StaminaToSet)
+{
+	CharacterStamina = StaminaToSet;
+}
+
 void ADeerToMeCharacter::StartDeerJump() {
 	if (GetCharacterMovement()->Velocity.Size() <= 5000) {
 		bIsJumping = true;

@@ -148,9 +148,14 @@ public:
 	/** Added to refill the stamina of the deer when testing */
 	void RefillStamina();
 
+	/* Used to kill the player instantly*/
+	UFUNCTION()
+	void SetStamina(float StaminaToSet);
+
 	// Function to call when the deer is seraching for another deer
 	UFUNCTION(BlueprintNativeEvent)
-		void CalledDeer();
+	void CalledDeer();
+
 	virtual void CalledDeer_Implementation();
 
 protected:
