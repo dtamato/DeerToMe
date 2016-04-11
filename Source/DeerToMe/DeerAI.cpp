@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "EngineUtils.h"
 #include "DeerAI.h"
+#include "DeerToMeCharacter.h"
 
 
 // Sets default values

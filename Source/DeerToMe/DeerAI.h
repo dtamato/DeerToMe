@@ -5,7 +5,7 @@
 #include "GameFramework/Character.h"
 #include "EngineUtils.h"
 #include "DeerAIController.h"
-#include "DeerToMeCharacter.h"
+// #include "DeerToMeCharacter.h"
 #include "DeerAI.generated.h"
 
 
@@ -21,10 +21,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly)
-	ADeerToMeCharacter* PlayerCharacter;
+	class ADeerToMeCharacter* PlayerCharacter;
 
 	UPROPERTY(EditDefaultsOnly)
-	ADeerAIController* DeerAIController;
+	class ADeerAIController* DeerAIController;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

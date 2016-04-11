@@ -32,20 +32,21 @@ class ADeerToMeCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* CallOutDistance;
 
+public:
+
+	ADeerToMeCharacter();
+
 	/** Collision Sphere */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* CollectionSphere;
 
-public:
-	ADeerToMeCharacter();
-
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
 
 	/* Delete theses later their just for testing */
 	UPROPERTY(EditDefaultsOnly)
@@ -118,6 +119,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Camera")
 		UCameraComponent* GetPlayerCamera();
+
+	UFUNCTION(BlueprintPure, Category = "Particles")
+	class ADeerAI* GetClosestDeer();
+
+	UFUNCTION(BlueprintPure, Category = "Particles")
+		bool GetPlayEffects();
 
 	/** Toggle the players speed to a run or a walk */
 	void TogglePlayerRun();
@@ -220,6 +227,7 @@ protected:
 	// 	void PowerChangeEffect();
 
 private:
+
 	// Current poweer level of the character
 	UPROPERTY(VisibleAnywhere, Category = "Power")
 	float CharacterStamina;
@@ -253,6 +261,18 @@ private:
 
 	// Keeps track of the cuurent UI state
 	EUI_State CurrentUIState;
+
+	// For the particle animation
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		float ClosestDistance;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		float EffectsTimer;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		float MaxEffectTime;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		class ADeerAI* ClosestDeer;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		bool bPlayEffects;
 
 public:
 	/** Returns CameraBoom subobject **/

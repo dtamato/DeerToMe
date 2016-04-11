@@ -5,6 +5,7 @@
 #include "DeerToMeCharacter.h"
 #include "Pickup.h"
 #include "GrassPickup.h"
+#include "DeerAI.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ADeerToMeCharacter
@@ -61,7 +62,10 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	RunTimer = 0;
 	MaxRunTime = 4;
 	RunBoost = 3000;
+	ClosestDistance = 1000000;
 	CollectedDeer = 0;
+	EffectsTimer = 0;
+	MaxEffectTime = 5;
 
 	JumpTimer = 0;
 	JumpWaitTime = 1;
@@ -69,6 +73,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	EatTimer = 0;
 	MaxEatTime = 2;
 
+	bPlayEffects = false;
 	bIsRunning = false;
 	bIsJumping = false;
 	bCheckJump = false;
@@ -158,6 +163,14 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		if (RunTimer >= MaxRunTime) {
 			bIsRunning = false;
 			RunTimer = 0;
+		}
+	}
+
+	if (bPlayEffects) {
+		EffectsTimer += DeltaTime;
+		if (EffectsTimer >= MaxEffectTime) {
+			bPlayEffects = false;
+			EffectsTimer = 0;
 		}
 	}
 
@@ -404,6 +417,33 @@ void ADeerToMeCharacter::CheckJump(float DeltaTime) {
 }
 
 void ADeerToMeCharacter::CalledDeer_Implementation() {
-	//Load a debug message
-	UE_LOG(LogClass, Log, TEXT("You have called %s"));
+	ClosestDistance = 1000000;
+	UE_LOG(LogClass, Log, TEXT("Calling For deer"));
+	// Get all ai deer
+	for (TActorIterator<ADeerAI> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		UE_LOG(LogClass, Log, TEXT("Finding deer"));
+		// Same as with the Object Iterator, access the subclass instance with the * or -> operators.
+		ADeerAI* TempAIDeer = Cast<ADeerAI>(*ActorItr);
+		if (TempAIDeer) {
+			
+			float tempDistance = GetDistanceTo(TempAIDeer);
+			UE_LOG(LogClass, Log, TEXT("found deer distance: %f"), tempDistance);
+			if (tempDistance < ClosestDistance && TempAIDeer->bIsCollected == false) {
+				UE_LOG(LogClass, Log, TEXT("found closer deer"));
+				ClosestDistance = tempDistance;
+				ClosestDeer = TempAIDeer;
+				bPlayEffects = true;
+			}
+		}
+	}
+}
+
+
+bool ADeerToMeCharacter::GetPlayEffects() {
+	return bPlayEffects;
+}
+
+ADeerAI* ADeerToMeCharacter::GetClosestDeer() {
+	return ClosestDeer;
 }
