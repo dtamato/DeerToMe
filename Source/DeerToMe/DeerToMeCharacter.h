@@ -13,7 +13,8 @@ enum class EUI_State {
 	EUI_ExitCollect,
 	EUI_EnterCallOut,
 	EUI_ExitCallOut,
-	EUI_Starve
+	EUI_Starve,
+	EUI_Win
 };
 
 UCLASS(config=Game)
@@ -234,9 +235,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 		float MaxRunTime;
-
-	// UFUNCTION(BlueprintImplementableEvent, Category = "Power")
-	// 	void PowerChangeEffect();
 
 private:
 
