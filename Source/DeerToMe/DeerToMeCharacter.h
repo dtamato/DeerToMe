@@ -63,6 +63,18 @@ public:
 	UFUNCTION()
 	void CallDeer();
 
+	/** Audio component */
+	UPROPERTY(VisibleAnywhere, Category = "Audio")
+	class UAudioComponent* audioComponent;
+
+	/** Played to look for deer as well as collect deer */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	class USoundBase* deerCallAudio;
+
+	/** Automatically played when deer is walking */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	class USoundBase* deerWalkAudio;
+
 	virtual void Tick(float DeltaTime) override;
 
 public:

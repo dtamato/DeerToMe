@@ -43,6 +43,11 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	FollowCamera->AttachTo(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	// Create the audio component
+	audioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
+	//audioComponent->SetSound(audioFile);
+	audioComponent->AttachParent = RootComponent;
+
 	DeerCall = false;
 	num = 0;
 	PrimaryActorTick.bCanEverTick = true;
@@ -120,6 +125,9 @@ void ADeerToMeCharacter::CallDeer()
 	//CallOutDistance->Activate(true);
 	FString Message = FString::Printf(TEXT("Hit Box On"));
 	GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Black, Message);
+
+	audioComponent->SetSound(deerCallAudio);
+	audioComponent->Play();
 }
 
 void ADeerToMeCharacter::Tick(float DeltaTime)
@@ -212,6 +220,18 @@ void ADeerToMeCharacter::MoveForward(float Value)
 		if (bIsJumping) { Value *= 0.5; }
 
 		AddMovementInput(Direction, Value);
+
+		// Play walking audio
+		if (audioComponent->IsPlaying() == false) {
+			audioComponent->SetSound(deerWalkAudio);
+			audioComponent->Play();
+		}
+	}
+	else if (Value == 0.0f) {
+
+		if (audioComponent->IsPlaying()) {
+			audioComponent->Stop();
+		}
 	}
 }
 

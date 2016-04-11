@@ -41,6 +41,8 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 		if (DeerCharacter && DeerCharacter->GetDeersCollected() == deerToCollect) {
 			
 			UE_LOG(LogClass, Warning, TEXT("GOOD JORB MAN"));
+			//UGameplayStatics::OpenLevel()
+			GetWorld()->ServerTravel(FString("/Game/Maps/Dave"));
 		}
 		else {
 
