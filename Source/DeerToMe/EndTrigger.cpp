@@ -2,6 +2,7 @@
 
 #include "DeerToMe.h"
 #include "EndTrigger.h"
+#include "DeerToMeGameMode.h"
 
 
 // Sets default values
@@ -41,8 +42,10 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 		if (DeerCharacter && DeerCharacter->GetDeersCollected() == deerToCollect) {
 			
 			UE_LOG(LogClass, Warning, TEXT("GOOD JORB MAN"));
-			//UGameplayStatics::OpenLevel()
-			GetWorld()->ServerTravel(FString("/Game/Maps/Dave"));
+			// UGameplayStatics::OpenLevel()
+			DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
+			GetWorld()->ServerTravel(FString("/Game/Maps/NEWMAP"));
+			gameModeInstance->RemoveUI();
 		}
 		else {
 

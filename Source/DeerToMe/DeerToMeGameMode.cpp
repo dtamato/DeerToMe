@@ -22,12 +22,25 @@ ADeerToMeGameMode::ADeerToMeGameMode()
 	// Base deacy Rate
 	DecayRate = 0.01;
 	MaxStamina = 100;
+
+	bUIRemoved = false;
 }
 
 void ADeerToMeGameMode::BeginPlay() {
 	Super::BeginPlay();
 
 	bUIDisplayed = false;
+
+	if (GetWorld()->GetMapName() == "UEDPIE_0_4-seasons") {
+		UE_LOG(LogTemp, Warning, TEXT("4 Seasons map"));
+		if (HUDWidgetClass != nullptr) {
+			UE_LOG(LogTemp, Warning, TEXT("Load UI"));
+			CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+			if (CurrentWidget != nullptr) {
+				CurrentWidget->AddToViewport();
+			}
+		}
+	}
 }
 
 void ADeerToMeGameMode::Tick(float DeltaTime) {
@@ -39,7 +52,8 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 
 		FVector CharacterVelocity = MyCharacter->GetVelocity();
 
-		if (MyCharacter->GetGameStarted() == true && bUIDisplayed == false) {
+		// If you are in the main map and should render the ui
+		if (GetWorld()->GetMapName() == "UEDPIE_0_NEWMAP" && bUIDisplayed == false) {
 			bUIDisplayed = true;
 
 			if (HUDWidgetClass != nullptr) {
@@ -63,4 +77,15 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 
 float ADeerToMeGameMode::GetMaxStamina() const {
 	return MaxStamina;
+}
+
+void ADeerToMeGameMode::RemoveUI() {
+	UE_LOG(LogClass, Warning, TEXT("Removing UI"));
+	if (HUDWidgetClass != nullptr) {
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+		if (CurrentWidget != nullptr) {
+			UE_LOG(LogClass, Warning, TEXT("Removed UI"));
+			CurrentWidget->RemoveFromViewport();
+		}
+	}
 }

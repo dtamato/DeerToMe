@@ -19,6 +19,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	void RemoveUI();
+
 protected:
 	// rate at which the character loses power
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
@@ -37,6 +39,7 @@ protected:
 	class UUserWidget* CurrentWidget;
 
 	bool bUIDisplayed;
+	bool bUIRemoved;
 
 };
 
