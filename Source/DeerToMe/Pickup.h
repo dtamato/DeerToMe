@@ -53,6 +53,10 @@ protected:
 	// True when the pickup can be used
 	bool bIsActive;
 
+	/** Audio component */
+	UPROPERTY(VisibleAnywhere, Category = "Audio")
+	class UAudioComponent* audioComponent;
+
 private:
 
 	// Visual representation of object in the level 
@@ -69,6 +73,5 @@ private:
 
 	/** the desired intensity for the light */
 	UPROPERTY(VisibleAnywhere, Category = "Pickup Light")
-	float DesiredLightIntensity;
-	
+	float DesiredLightIntensity;	
 };

@@ -35,6 +35,11 @@ APickup::APickup()
 
 	// The brightness of the light when sphere is entered
 	DesiredLightIntensity = 3000.0f;
+
+	// Create the audio component
+	audioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
+	//audioComponent->SetSound(audioFile);
+	audioComponent->AttachParent = RootComponent;
 }
 
 // Called when the game starts or when spawned
@@ -79,6 +84,7 @@ void APickup::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent
 		
 		if (DeerCharacter && PickupLight->bVisible == false) {
 			UE_LOG(LogClass, Log, TEXT("On Overlap Begin Called."));
+			DeerCharacter->SetCurrentUIState(EUI_State::EUI_EnterCollect);
 			TogglePickupLight();
 		}
 	}
@@ -91,6 +97,7 @@ void APickup::OnOverlapEnd(class AActor* OtherActor, class UPrimitiveComponent* 
 
 		if (DeerCharacter && PickupLight->bVisible == true) {
 			UE_LOG(LogClass, Log, TEXT("On Overlap End Called."));
+			DeerCharacter->SetCurrentUIState(EUI_State::EUI_ExitCollect);
 			TogglePickupLight();
 		}
 	}

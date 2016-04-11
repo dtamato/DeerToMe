@@ -19,18 +19,12 @@ public:
 
 	virtual void BeginPlay() override;
 
+	void RemoveUI();
+
 protected:
 	// rate at which the character loses power
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
 		float DecayRate;
-
-	// Max rate at which the character loses power
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
-		float MaxDecayRate;
-
-	// Min rate at which the character loses power
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
-		float MinDecayRate;
 
 	/**Power needed to win game */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
@@ -41,8 +35,11 @@ protected:
 		TSubclassOf<class UUserWidget> HUDWidgetClass;
 
 	/** the instance of the HUD*/
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
 	class UUserWidget* CurrentWidget;
+
+	bool bUIDisplayed;
+	bool bUIRemoved;
 
 };
 

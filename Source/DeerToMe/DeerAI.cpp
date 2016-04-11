@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "EngineUtils.h"
 #include "DeerAI.h"
+#include "DeerToMeCharacter.h"
 
 
 // Sets default values
@@ -15,6 +16,7 @@ ADeerAI::ADeerAI()
 	OnActorEndOverlap.AddDynamic(this, &ADeerAI::OnEndOverlap);
 	HeardDeerCall = false;
 	InRangeOfDeerCall = false;
+	bIsCollected = false;
 }
 
 void ADeerAI::Tick(float DeltaTime)
@@ -28,6 +30,10 @@ void ADeerAI::Tick(float DeltaTime)
 		}
 	}
 
+	if (HeardDeerCall == true && bIsCollected == false) {
+		PlayerCharacter->IncreaseDeersCollected();
+		bIsCollected = true;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -45,6 +51,8 @@ void ADeerAI::OnBeginOverlap(AActor* OtherActor)
 	PlayerCharacter = Cast<ADeerToMeCharacter>(OtherActor);
 	if (PlayerCharacter)
 	{
+		if(PlayerCharacter->GetCurrentUIState() == EUI_State::EUI_None)
+			PlayerCharacter->SetCurrentUIState(EUI_State::EUI_EnterCallOut);
 		InRangeOfDeerCall = true;
 	}
 }
@@ -54,6 +62,8 @@ void ADeerAI::OnEndOverlap(AActor* OtherActor)
 	PlayerCharacter = Cast<ADeerToMeCharacter>(OtherActor);
 	if (PlayerCharacter)
 	{
+		if (PlayerCharacter->GetCurrentUIState() == EUI_State::EUI_None)
+		PlayerCharacter->SetCurrentUIState(EUI_State::EUI_ExitCallOut);
 		InRangeOfDeerCall = false;
 	}
 }

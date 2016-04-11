@@ -3,6 +3,20 @@
 #include "GameFramework/Character.h"
 #include "DeerToMeCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EUI_State {
+
+	EUI_None = 0,
+	EUI_EnterRun,
+	EUI_ExitRun,
+	EUI_EnterCollect,
+	EUI_ExitCollect,
+	EUI_EnterCallOut,
+	EUI_ExitCallOut,
+	EUI_Starve,
+	EUI_Win
+};
+
 UCLASS(config=Game)
 class ADeerToMeCharacter : public ACharacter
 {
@@ -13,27 +27,27 @@ class ADeerToMeCharacter : public ACharacter
 	class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-
 
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* CallOutDistance;
+
+public:
+
+	ADeerToMeCharacter();
 
 	/** Collision Sphere */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* CollectionSphere;
 
-public:
-	ADeerToMeCharacter();
-
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
 
 	/* Delete theses later their just for testing */
 	UPROPERTY(EditDefaultsOnly)
@@ -51,6 +65,18 @@ public:
 	UFUNCTION()
 	void CallDeer();
 
+	/** Audio component */
+	UPROPERTY(VisibleAnywhere, Category = "Audio")
+	class UAudioComponent* audioComponent;
+
+	/** Played to look for deer as well as collect deer */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	class USoundBase* deerCallAudio;
+
+	/** Automatically played when deer is walking */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	class USoundBase* deerWalkAudio;
+
 	virtual void Tick(float DeltaTime) override;
 
 public:
@@ -65,21 +91,53 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Power")
 		float GetInitilaStamina();
 	
-	// Accessor for current power
 	UFUNCTION(BlueprintPure, Category = "Power")
 		float GetCurrentStamina();
 
-	// Accessor for character speed
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsRunning();
 
-	// Accessor for character speed
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsEating();
 
-	// Accessor for character speed
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsJumping();
+
+	UFUNCTION(BlueprintPure, Category = "Power")
+		bool GetIsStarving();
+
+	UFUNCTION(BlueprintPure, Category = "Power")
+		bool GetGameStarted();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetGameStarted(bool GameState);
+
+	/** Returns the current UI state*/
+	UFUNCTION(BlueprintPure, Category = "UI")
+		EUI_State GetCurrentUIState();
+
+	/** Sets a new UI state*/
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetCurrentUIState(EUI_State NewState);
+
+	/** Resets the UI state to none */
+	UFUNCTION(BlueprintCallable, Category = "UI")
+		void ResetCurrentUIState();
+
+	UFUNCTION()
+	void IncreaseDeersCollected();
+
+	UFUNCTION(BlueprintPure, Category = "UI")
+		uint8 GetDeersCollected();
+
+	UFUNCTION(BlueprintPure, Category = "Camera")
+		UCameraComponent* GetPlayerCamera();
+
+	UFUNCTION(BlueprintPure, Category = "Particles")
+	class ADeerAI* GetClosestDeer();
+
+	UFUNCTION(BlueprintPure, Category = "Particles")
+		bool GetPlayEffects();
 
 	/** Toggle the players speed to a run or a walk */
 	void TogglePlayerRun();
@@ -89,6 +147,11 @@ public:
 
 	/** Added to refill the stamina of the deer when testing */
 	void RefillStamina();
+
+	// Function to call when the deer is seraching for another deer
+	UFUNCTION(BlueprintNativeEvent)
+		void CalledDeer();
+	virtual void CalledDeer_Implementation();
 
 protected:
 
@@ -142,14 +205,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float BaseSpeed;
 
-	/** Max Speed of Character*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
-		float RunSpeed;
-
-	/** Min Speed of Character*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
-		float WalkSpeed;
-
 	/** Current Speed of character*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float CurrentSpeed;
@@ -163,24 +218,41 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		bool bIsJumping;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
+		bool bIsStarved;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
+		bool bGameStarted;
+
 	UPROPERTY(EditDefaultsOnly)
 		float EatTimer;
 
 	UPROPERTY(EditDefaultsOnly)
 		float MaxEatTime;
-	// UFUNCTION(BlueprintImplementableEvent, Category = "Power")
-	// 	void PowerChangeEffect();
+
+	UPROPERTY(EditDefaultsOnly)
+		float RunTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+		float MaxRunTime;
 
 private:
+
 	// Current poweer level of the character
 	UPROPERTY(VisibleAnywhere, Category = "Power")
 	float CharacterStamina;
+
+	UPROPERTY(VisibleAnywhere, Category = "Power")
+	float RunBoost;
 
 	UPROPERTY()
 	bool bCheckJump;
 
 	UPROPERTY()
 	bool bCheckRun;
+
+	UPROPERTY()
+	uint8 CollectedDeer;
 
 	UFUNCTION()
 	void StartDeerJump();
@@ -196,6 +268,21 @@ private:
 
 	UFUNCTION()
 	void CheckJump(float DeltaTime);
+
+	// Keeps track of the cuurent UI state
+	EUI_State CurrentUIState;
+
+	// For the particle animation
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		float ClosestDistance;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		float EffectsTimer;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		float MaxEffectTime;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		class ADeerAI* ClosestDeer;
+	UPROPERTY(VisibleAnywhere, Category = "Particles")
+		bool bPlayEffects;
 
 public:
 	/** Returns CameraBoom subobject **/

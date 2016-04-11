@@ -5,6 +5,7 @@
 #include "DeerToMeCharacter.h"
 #include "Pickup.h"
 #include "GrassPickup.h"
+#include "DeerAI.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ADeerToMeCharacter
@@ -35,13 +36,18 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->AttachTo(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->AttachTo(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	// Create the audio component
+	audioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
+	//audioComponent->SetSound(audioFile);
+	audioComponent->AttachParent = RootComponent;
 
 	DeerCall = false;
 	num = 0;
@@ -52,25 +58,33 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	CollectionSphere->SetSphereRadius(100);
 
 	// Set a base power level for the character STAMINA
-	InitialStamina = 10000.f;
+	InitialStamina = 1000.0f;
 	CharacterStamina = InitialStamina;
 
 	// set the dependence of the speed on the power level
-	BaseSpeed = 10.0f;
-	RunSpeed = 0.05f;
-	WalkSpeed = 0.01f;
-	SpeedFactor = WalkSpeed;
-	
+	BaseSpeed = 100.0f;
+	SpeedFactor = 10;
+	RunTimer = 0;
+	MaxRunTime = 4;
+	RunBoost = 3000;
+	ClosestDistance = 1000000;
+	CollectedDeer = 0;
+	EffectsTimer = 0;
+	MaxEffectTime = 5;
+
 	JumpTimer = 0;
 	JumpWaitTime = 1;
 	
 	EatTimer = 0;
 	MaxEatTime = 2;
 
+	bPlayEffects = false;
 	bIsRunning = false;
 	bIsJumping = false;
 	bCheckJump = false;
 	bCheckRun = false;
+	bIsStarved = false;
+	bGameStarted = false;
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -92,6 +106,7 @@ void ADeerToMeCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAction("Collect", IE_Pressed, this, &ADeerToMeCharacter::CollectPickups);
 	InputComponent->BindAction("AdjustSpeed", IE_Pressed, this, &ADeerToMeCharacter::TogglePlayerRun);
 	InputComponent->BindAction("RefillStamina", IE_Pressed, this, &ADeerToMeCharacter::RefillStamina);
+	InputComponent->BindAction("Look", IE_Pressed, this, &ADeerToMeCharacter::CalledDeer);
 
 	InputComponent->BindAxis("MoveForward", this, &ADeerToMeCharacter::MoveForward);
 	// InputComponent->BindAxis("MoveRight", this, &ADeerToMeCharacter::MoveRight);
@@ -115,6 +130,9 @@ void ADeerToMeCharacter::CallDeer()
 	//CallOutDistance->Activate(true);
 	FString Message = FString::Printf(TEXT("Hit Box On"));
 	GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Black, Message);
+
+	audioComponent->SetSound(deerCallAudio);
+	audioComponent->Play();
 }
 
 void ADeerToMeCharacter::Tick(float DeltaTime)
@@ -148,10 +166,28 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		CheckJump(DeltaTime);
 	}
 
-	if (GetCharacterMovement()->Velocity.Size() > 550) { bIsRunning = true; }
-	else { bIsRunning = false; }
-}
+	if (bIsRunning) {
+		RunTimer += DeltaTime;
+		if (RunTimer >= MaxRunTime) {
+			bIsRunning = false;
+			RunTimer = 0;
+		}
+	}
 
+	if (bPlayEffects) {
+		EffectsTimer += DeltaTime;
+		if (EffectsTimer >= MaxEffectTime) {
+			bPlayEffects = false;
+			EffectsTimer = 0;
+		}
+	}
+
+	if (CharacterStamina <= 0 && bIsStarved == false) { 
+		SetCurrentUIState(EUI_State::EUI_Starve); 
+		bIsStarved = true;
+	}
+
+}
 
 void ADeerToMeCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
@@ -185,7 +221,7 @@ void ADeerToMeCharacter::LookUpAtRate(float Rate)
 
 void ADeerToMeCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f) && !bIsEating /*&& !bIsJumping*/)
+	if ((Controller != NULL) && (Value != 0.0f) && !bIsEating && !bIsStarved)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -197,6 +233,18 @@ void ADeerToMeCharacter::MoveForward(float Value)
 		if (bIsJumping) { Value *= 0.5; }
 
 		AddMovementInput(Direction, Value);
+
+		// Play walking audio
+		if (audioComponent->IsPlaying() == false) {
+			audioComponent->SetSound(deerWalkAudio);
+			audioComponent->Play();
+		}
+	}
+	else if (Value == 0.0f) {
+
+		if (audioComponent->IsPlaying()) {
+			audioComponent->Stop();
+		}
 	}
 }
 
@@ -216,36 +264,40 @@ void ADeerToMeCharacter::MoveRight(float Value)
 }
 
 void ADeerToMeCharacter::CollectPickups() {
-	// Get all overlapping  actors and store then in an array
-	TArray<AActor*> CollectedActors;
-	CollectionSphere->GetOverlappingActors(CollectedActors);
+	if (CharacterStamina < InitialStamina - 10) {
+		// Get all overlapping  actors and store then in an array
+		TArray<AActor*> CollectedActors;
+		CollectionSphere->GetOverlappingActors(CollectedActors);
 
-	// Keep track of collected poewer
-	float CollectedStamina = 0;
+		// Keep track of collected poewer
+		float CollectedStamina = 0;
 
-	// this function loops though all of the pickups in the volume and refills the character power accordingly for each actor we collected 
-	for (int32 iCollected = 0; iCollected < CollectedActors.Num(); ++iCollected) {
-		// Cast the actor to APikcup
-		APickup* TestPickup = Cast<APickup>(CollectedActors[iCollected]);
-		// If the cast is successfula dn the pickup is valid and active
-		if (TestPickup && !TestPickup->IsPendingKill() && TestPickup->IsActive()) {
-			// Set eating boolean to true
-			bIsEating = true;
-			// Then call the pickups WasCollected function
-			TestPickup->WasCollected();
-			// Check to see if pickup is battery
-			AGrassPickup* TestGrass = Cast<AGrassPickup>(TestPickup);
-			if (TestGrass) {
-				// Increase the collected power
-				CollectedStamina += TestGrass->GetStamina();
+		// this function loops though all of the pickups in the volume and refills the character power accordingly for each actor we collected 
+		for (int32 iCollected = 0; iCollected < CollectedActors.Num(); ++iCollected) {
+			// Cast the actor to APikcup
+			APickup* TestPickup = Cast<APickup>(CollectedActors[iCollected]);
+			// If the cast is successfula dn the pickup is valid and active
+			if (TestPickup && !TestPickup->IsPendingKill() && TestPickup->IsActive()) {
+				// Set eating boolean to true
+				bIsEating = true;
+				// Then call the pickups WasCollected function
+				TestPickup->WasCollected();
+				// Check to see if pickup is battery
+				AGrassPickup* TestGrass = Cast<AGrassPickup>(TestPickup);
+				if (TestGrass) {
+					// Increase the collected power
+					UE_LOG(LogTemp, Warning, TEXT("Eating"));
+					CollectedStamina += TestGrass->GetStamina();
+					SetCurrentUIState(EUI_State::EUI_ExitCollect);
+				}
+				// Deactivate the Pickup
+				TestPickup->SetActive(false);
 			}
-			// Deactivate the Pickup
-			TestPickup->SetActive(false);
 		}
-	}
 
-	if (CollectedStamina > 0) {
-		UpdateStamina(CollectedStamina);
+		if (CollectedStamina > 0) {
+			UpdateStamina(CollectedStamina);
+		}
 	}
 }
 
@@ -269,32 +321,80 @@ bool ADeerToMeCharacter::GetIsJumping() {
 	return bIsJumping;
 }
 
+bool ADeerToMeCharacter::GetIsStarving() {
+	return bIsStarved;
+}
+
+bool ADeerToMeCharacter::GetGameStarted() {
+	return bGameStarted;
+}
+
+void ADeerToMeCharacter::SetGameStarted(bool GameState) {
+	bGameStarted = GameState;
+}
+
+EUI_State ADeerToMeCharacter::GetCurrentUIState() {
+	return CurrentUIState;
+}
+
+void ADeerToMeCharacter::SetCurrentUIState(EUI_State NewState) {
+	UE_LOG(LogTemp, Warning, TEXT("Setting player UI State"));
+	CurrentUIState = NewState;
+}
+
+void ADeerToMeCharacter::ResetCurrentUIState() {
+	UE_LOG(LogTemp, Warning, TEXT("resetting player UI State"));
+	CurrentUIState = EUI_State::EUI_None;
+}
+
+void ADeerToMeCharacter::IncreaseDeersCollected() {
+	CollectedDeer++;
+}
+
+uint8 ADeerToMeCharacter::GetDeersCollected() {
+	return CollectedDeer;
+}
+
+UCameraComponent* ADeerToMeCharacter::GetPlayerCamera() {
+	return FollowCamera;
+}
+
 void ADeerToMeCharacter::TogglePlayerRun() {
 	UE_LOG(LogTemp, Warning, TEXT("Toggling Player Speed"));
-	if (bIsRunning) {
-		SpeedFactor = WalkSpeed;
-	}
-	else {
-		SpeedFactor = RunSpeed;
-	}
+	// Check to see if the player still has half their stamina
+	if (CharacterStamina >= (InitialStamina * 0.3f) && !bIsRunning) {
+		// if they do allow them to run -- countdown in tick -- add in a timed variable
+		bIsRunning = true;
+		// Decrease their stamina by a quarter
+		CharacterStamina -= (InitialStamina * 0.25f);
+	}	
 }
 
 void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 	//Change power
 	CharacterStamina = CharacterStamina + StanimaChange;
+
+	if (CharacterStamina > InitialStamina) { CharacterStamina = InitialStamina; }
+
 	// Chnage speed based on power
-	GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + (SpeedFactor * CharacterStamina * 5);
+	if (!bIsRunning) {
+		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.1f);
+	}
+	else {
+		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor + RunBoost;
+	}
+
+	// UE_LOG(LogTemp, Warning, TEXT("Player Max Speed %f"), GetCharacterMovement()->MaxWalkSpeed);
 	// Call visual effect, audio and animation
 }
 
 void ADeerToMeCharacter::RefillStamina() {
 	CharacterStamina = InitialStamina;
-	if (bIsRunning) SpeedFactor = RunSpeed;
-	else SpeedFactor = WalkSpeed;
+	SpeedFactor = BaseSpeed;
 }
 
 void ADeerToMeCharacter::StartDeerJump() {
-	if (GetCharacterMovement()->Velocity.Size() <= 700) {
+	if (GetCharacterMovement()->Velocity.Size() <= 5000) {
 		bIsJumping = true;
 	}
 }
@@ -334,4 +434,36 @@ void ADeerToMeCharacter::CheckJump(float DeltaTime) {
 			}
 		}
 	}
+}
+
+void ADeerToMeCharacter::CalledDeer_Implementation() {
+	ClosestDistance = 1000000;
+	UE_LOG(LogClass, Log, TEXT("Calling For deer"));
+	// Get all ai deer
+	for (TActorIterator<ADeerAI> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		UE_LOG(LogClass, Log, TEXT("Finding deer"));
+		// Same as with the Object Iterator, access the subclass instance with the * or -> operators.
+		ADeerAI* TempAIDeer = Cast<ADeerAI>(*ActorItr);
+		if (TempAIDeer) {
+			
+			float tempDistance = GetDistanceTo(TempAIDeer);
+			UE_LOG(LogClass, Log, TEXT("found deer distance: %f"), tempDistance);
+			if (tempDistance < ClosestDistance && TempAIDeer->bIsCollected == false) {
+				UE_LOG(LogClass, Log, TEXT("found closer deer"));
+				ClosestDistance = tempDistance;
+				ClosestDeer = TempAIDeer;
+				bPlayEffects = true;
+			}
+		}
+	}
+}
+
+
+bool ADeerToMeCharacter::GetPlayEffects() {
+	return bPlayEffects;
+}
+
+ADeerAI* ADeerToMeCharacter::GetClosestDeer() {
+	return ClosestDeer;
 }

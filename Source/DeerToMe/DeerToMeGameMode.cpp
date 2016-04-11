@@ -20,19 +20,25 @@ ADeerToMeGameMode::ADeerToMeGameMode()
 	}
 
 	// Base deacy Rate
-	MinDecayRate = 0.05f;
-	MaxDecayRate = 0.1f;
-	DecayRate = MinDecayRate;
+	DecayRate = 0.01;
 	MaxStamina = 100;
+
+	bUIRemoved = false;
 }
 
 void ADeerToMeGameMode::BeginPlay() {
 	Super::BeginPlay();
 
-	if (HUDWidgetClass != nullptr) {
-		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
-		if (CurrentWidget != nullptr) {
-			CurrentWidget->AddToViewport();
+	bUIDisplayed = false;
+
+	if (GetWorld()->GetMapName() == "UEDPIE_0_4-seasons") {
+		UE_LOG(LogTemp, Warning, TEXT("4 Seasons map"));
+		if (HUDWidgetClass != nullptr) {
+			UE_LOG(LogTemp, Warning, TEXT("Load UI"));
+			CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+			if (CurrentWidget != nullptr) {
+				CurrentWidget->AddToViewport();
+			}
 		}
 	}
 }
@@ -46,21 +52,40 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 
 		FVector CharacterVelocity = MyCharacter->GetVelocity();
 
+		// If you are in the main map and should render the ui
+		if (GetWorld()->GetMapName() == "UEDPIE_0_NEWMAP" && bUIDisplayed == false) {
+			bUIDisplayed = true;
+
+			if (HUDWidgetClass != nullptr) {
+				CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+				if (CurrentWidget != nullptr) {
+					CurrentWidget->AddToViewport();
+				}
+			}
+		}
+
 		if (CharacterVelocity.Size() > 0) {
 
 			// if our power is greater than needed to win, set the gaem state to won
 			MaxStamina = (MyCharacter->GetInitilaStamina());
-
-			// Check to see if the player is running or walking and adjust the decay accordingly
-			if (MyCharacter->GetIsRunning()) { DecayRate = MaxDecayRate; }
-			else { DecayRate = MinDecayRate; }
-
+			//UE_LOG(LogTemp, Warning, TEXT("Decaying Stamina"));
 			// If the character still has power decrease it gradually using DecayRate
-			if (MyCharacter->GetCurrentStamina() > 0.3f) { MyCharacter->UpdateStamina(-DeltaTime * DecayRate * (MyCharacter->GetInitilaStamina())); }
+			if (MyCharacter->GetCurrentStamina() > 0.0f) { MyCharacter->UpdateStamina(-DeltaTime * DecayRate * MaxStamina); }
 		}
 	}
 }
 
 float ADeerToMeGameMode::GetMaxStamina() const {
 	return MaxStamina;
+}
+
+void ADeerToMeGameMode::RemoveUI() {
+	UE_LOG(LogClass, Warning, TEXT("Removing UI"));
+	if (HUDWidgetClass != nullptr) {
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+		if (CurrentWidget != nullptr) {
+			UE_LOG(LogClass, Warning, TEXT("Removed UI"));
+			CurrentWidget->RemoveFromViewport();
+		}
+	}
 }
