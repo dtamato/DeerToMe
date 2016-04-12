@@ -33,5 +33,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "EndTrigger")
 	class UBoxComponent* OverlapBox;
 
-	class ADeerToMeGameMode* gameModeInstance;
+	class ADeerToMeGameMode* gameMode;
+
 };

@@ -38,8 +38,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
 	class UUserWidget* CurrentWidget;
 
+	class EndTrigger* endTrigger;
+
 	bool bUIDisplayed;
-	bool bUIRemoved;
 
 };
 

@@ -19,12 +19,16 @@ AEndTrigger::AEndTrigger()
 	// Designate the OnOverlap function as a delegate called when an actor overlaps or leaves the sphere component
 	OverlapBox->OnComponentBeginOverlap.AddDynamic(this, &AEndTrigger::OnOverlapBegin);
 
+	// gameMode = Cast<ADeerToMeGameMode>(GetWorld()->GetAuthGameMode());
+	// AGameMode* tempGameMode = GetWorld()->GetAuthGameMode();
+	
 }
 
 // Called when the game starts or when spawned
 void AEndTrigger::BeginPlay()
 {
 	Super::BeginPlay();
+	gameMode = (ADeerToMeGameMode*)GetWorld()->GetAuthGameMode();
 }
 
 // Called every frame
@@ -43,9 +47,11 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 			
 			UE_LOG(LogClass, Warning, TEXT("GOOD JORB MAN"));
 			// UGameplayStatics::OpenLevel()
-			DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
+			// if this is the game level - DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
 			GetWorld()->ServerTravel(FString("/Game/Maps/NEWMAP"));
-			gameModeInstance->RemoveUI();
+			if (gameMode != NULL) { 
+				gameMode->RemoveUI();
+			}
 		}
 		else {
 
@@ -53,4 +59,3 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 		}
 	}
 }
-
