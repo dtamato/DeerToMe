@@ -355,10 +355,6 @@ uint8 ADeerToMeCharacter::GetDeersCollected() {
 	return CollectedDeer;
 }
 
-UCameraComponent* ADeerToMeCharacter::GetPlayerCamera() {
-	return FollowCamera;
-}
-
 void ADeerToMeCharacter::TogglePlayerRun() {
 	UE_LOG(LogTemp, Warning, TEXT("Toggling Player Speed"));
 	// Check to see if the player still has half their stamina

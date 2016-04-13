@@ -130,9 +130,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "UI")
 		uint8 GetDeersCollected();
 
-	UFUNCTION(BlueprintPure, Category = "Camera")
-		UCameraComponent* GetPlayerCamera();
-
 	UFUNCTION(BlueprintPure, Category = "Particles")
 	class ADeerAI* GetClosestDeer();
 

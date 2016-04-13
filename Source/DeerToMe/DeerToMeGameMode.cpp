@@ -1,6 +1,7 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
 #include "DeerToMe.h"
+#include "Engine.h"
 #include "DeerToMeGameMode.h"
 #include "DeerToMeCharacter.h"
 #include "Kismet/GameplayStatics.h"
@@ -23,13 +24,11 @@ ADeerToMeGameMode::ADeerToMeGameMode()
 	DecayRate = 0.01;
 	MaxStamina = 100;
 
-	bUIRemoved = false;
+	bUIDisplayed = false;
 }
 
 void ADeerToMeGameMode::BeginPlay() {
 	Super::BeginPlay();
-
-	bUIDisplayed = false;
 
 	if (GetWorld()->GetMapName() == "UEDPIE_0_4-seasons") {
 		UE_LOG(LogTemp, Warning, TEXT("4 Seasons map"));
@@ -52,9 +51,14 @@ void ADeerToMeGameMode::Tick(float DeltaTime) {
 
 		FVector CharacterVelocity = MyCharacter->GetVelocity();
 
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("%s"), mapName);
+
 		// If you are in the main map and should render the ui
-		if (GetWorld()->GetMapName() == "UEDPIE_0_NEWMAP" && bUIDisplayed == false) {
+		if (/*GetWorld()->GetMapName() == "UEDPIE_0_NEWMAP"*/ MyCharacter->GetGameStarted() == true && bUIDisplayed == false) {
 			bUIDisplayed = true;
+
+			FString mapName = GetWorld()->GetMapName();
+			UE_LOG(LogTemp, Warning, TEXT("CurrentMap: %s"), *mapName);
 
 			if (HUDWidgetClass != nullptr) {
 				CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
@@ -85,7 +89,7 @@ void ADeerToMeGameMode::RemoveUI() {
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
 		if (CurrentWidget != nullptr) {
 			UE_LOG(LogClass, Warning, TEXT("Removed UI"));
-			CurrentWidget->RemoveFromViewport();
+			CurrentWidget->RemoveFromParent();
 		}
 	}
 }
