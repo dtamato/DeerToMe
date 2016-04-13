@@ -62,11 +62,11 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	CharacterStamina = InitialStamina;
 
 	// set the dependence of the speed on the power level
-	BaseSpeed = 100.0f;
+	BaseSpeed = 50.0f;
 	SpeedFactor = 10;
 	RunTimer = 0;
 	MaxRunTime = 4;
-	RunBoost = 3000;
+	RunBoost = 1000;
 	ClosestDistance = 1000000;
 	CollectedDeer = 0;
 	EffectsTimer = 0;
