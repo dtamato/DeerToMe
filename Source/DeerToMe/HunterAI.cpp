@@ -42,9 +42,6 @@ void AHunterAI::Tick(float DeltaTime)
 			PlayerCharacter->SetCurrentUIState(EUI_State::EUI_EnterRun);
 			bNotifiedUI = true;
 		}
-		
-		ScreenColorIntensity = DistanceFromPlayer / MaxDistanceFromPlayer;
-		VingetteIntensity = 1 - ScreenColorIntensity;
 	}
 	else {
 		if (bNotifiedUI == true) {

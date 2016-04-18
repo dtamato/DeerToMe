@@ -14,7 +14,18 @@ enum class EUI_State {
 	EUI_EnterCallOut,
 	EUI_ExitCallOut,
 	EUI_Starve,
-	EUI_Win
+	EUI_Win,
+	EUI_Lose
+};
+
+enum class DeerState {
+
+	DeerState_Run,
+	DeerState_Eat,
+	DeerState_Walk,
+	DeerState_Shot,
+	DeerState_Starved,
+	DeerState_Won
 };
 
 UCLASS(config=Game)
@@ -77,6 +88,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
 	class USoundBase* deerWalkAudio;
 
+	/** Played to look for deer as well as collect deer */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	class USoundBase* deerShotAudio;
+
 	virtual void Tick(float DeltaTime) override;
 
 public:
@@ -108,6 +123,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetGameStarted();
+
+	UFUNCTION(BlueprintPure, Category = "Health")
+		bool GetIsShot();
+
+	UFUNCTION()
+	void SetIsShot(bool shotState);
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetGameStarted(bool GameState);
@@ -252,6 +273,9 @@ private:
 
 	UPROPERTY()
 	bool bCheckRun;
+
+	UPROPERTY()
+	bool bIsShot;
 
 	UPROPERTY()
 	uint8 CollectedDeer;

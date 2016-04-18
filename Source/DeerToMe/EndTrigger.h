@@ -35,4 +35,9 @@ private:
 
 	class ADeerToMeGameMode* gameMode;
 
+	// Wait to end Game Variables
+	float WaitToEnd;
+	float Timer;
+	bool bStartWait;
+
 };

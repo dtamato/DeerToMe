@@ -22,9 +22,13 @@ EBTNodeResult::Type UHunterDistanceToDeerCheckTask::ExecuteTask(UBehaviorTreeCom
 		AHunterAI* HunterController = Cast<AHunterAI>(NewHunter->GetCharacter());
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerKey, HunterController->PlayerCharacter);
 
-		if (HunterController && HunterController->GetDistanceTo(HunterController->PlayerCharacter) <= 1500.0f)
+		if (HunterController && HunterController->GetDistanceTo(HunterController->PlayerCharacter) <= 1500.0f && bShotPlayer == false)
 		{	
 			//play sound here
+			// Set the UI State of the player THEN reduce stamina
+			bShotPlayer = true;
+			HunterController->PlayerCharacter->SetCurrentUIState(EUI_State::EUI_Lose);
+			HunterController->PlayerCharacter->SetIsShot(true);
 			HunterController->PlayerCharacter->SetStamina(0.0f);
 			return EBTNodeResult::Succeeded;
 		}

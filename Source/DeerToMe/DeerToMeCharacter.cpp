@@ -85,6 +85,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	bCheckRun = false;
 	bIsStarved = false;
 	bGameStarted = false;
+	bIsShot = false;
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -182,11 +183,10 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		}
 	}
 
-	if (CharacterStamina <= 0 && bIsStarved == false) { 
+	if (CharacterStamina <= 0 && bIsStarved == false && bIsShot == false) { 
 		SetCurrentUIState(EUI_State::EUI_Starve); 
 		bIsStarved = true;
 	}
-
 }
 
 void ADeerToMeCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -240,7 +240,7 @@ void ADeerToMeCharacter::MoveForward(float Value)
 			audioComponent->Play();
 		}
 	}
-	else if (Value == 0.0f) {
+	else if (Value == 0.0f && bIsShot == false) {
 
 		if (audioComponent->IsPlaying()) {
 			audioComponent->Stop();
@@ -329,6 +329,10 @@ bool ADeerToMeCharacter::GetGameStarted() {
 	return bGameStarted;
 }
 
+bool ADeerToMeCharacter::GetGameStarted() {
+	return bIsShot;
+}
+
 void ADeerToMeCharacter::SetGameStarted(bool GameState) {
 	bGameStarted = GameState;
 }
@@ -340,6 +344,16 @@ EUI_State ADeerToMeCharacter::GetCurrentUIState() {
 void ADeerToMeCharacter::SetCurrentUIState(EUI_State NewState) {
 	UE_LOG(LogTemp, Warning, TEXT("Setting player UI State"));
 	CurrentUIState = NewState;
+
+	// Play UI Audio Clips Here
+	if (CurrentUIState == EUI_State::EUI_Lose) {
+		audioComponent->SetSound(deerShotAudio);
+		audioComponent->Play();
+	}
+}
+
+void ADeerToMeCharacter::SetIsShot( bool shotState ) {
+	bIsShot = shotState;
 }
 
 void ADeerToMeCharacter::ResetCurrentUIState() {
@@ -458,6 +472,9 @@ void ADeerToMeCharacter::CalledDeer_Implementation() {
 			}
 		}
 	}
+
+	audioComponent->SetSound(deerCallAudio);
+	audioComponent->Play();
 }
 
 
