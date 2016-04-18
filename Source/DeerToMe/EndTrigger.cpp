@@ -21,7 +21,10 @@ AEndTrigger::AEndTrigger()
 
 	// gameMode = Cast<ADeerToMeGameMode>(GetWorld()->GetAuthGameMode());
 	// AGameMode* tempGameMode = GetWorld()->GetAuthGameMode();
-	
+
+	WaitToEnd = 3;
+	Timer = 0;
+	bStartWait = false;
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +38,13 @@ void AEndTrigger::BeginPlay()
 void AEndTrigger::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
+
+	if (bStartWait) {
+		Timer += DeltaTime;
+		if (Timer >= WaitToEnd) {
+			GetWorld()->ServerTravel(FString("/Game/Maps/NEWMAP"));
+		}
+	}
 }
 
 void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
@@ -48,7 +58,9 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 			UE_LOG(LogClass, Warning, TEXT("GOOD JORB MAN"));
 			// UGameplayStatics::OpenLevel()
 			// if this is the game level - DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
-			GetWorld()->ServerTravel(FString("/Game/Maps/NEWMAP"));
+			DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
+			bStartWait = true;
+
 			if (gameMode != NULL) { 
 				gameMode->RemoveUI();
 			}

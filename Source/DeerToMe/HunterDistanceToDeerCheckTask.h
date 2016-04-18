@@ -20,5 +20,9 @@ public:
 	bool InLineOfSight(AHunterAI* Target1, ADeerToMeCharacter* Target2);
 
 	FName Player = "Player";
+
+private:
+
+	bool bShotPlayer = false;
 	
 };
