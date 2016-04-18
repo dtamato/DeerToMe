@@ -24,7 +24,7 @@ void ADeerAI::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (InRangeOfDeerCall == true)
 	{
-		if (PlayerCharacter->DeerCall == true)
+		if (PlayerCharacter && PlayerCharacter->DeerCall == true)
 		{
 			HeardDeerCall = true;
 		}

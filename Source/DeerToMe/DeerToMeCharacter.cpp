@@ -66,7 +66,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	SpeedFactor = 10;
 	RunTimer = 0;
 	MaxRunTime = 4;
-	RunBoost = 1000;
+	RunBoost = 100;
 	ClosestDistance = 1000000;
 	CollectedDeer = 0;
 	EffectsTimer = 0;
@@ -351,8 +351,14 @@ void ADeerToMeCharacter::IncreaseDeersCollected() {
 	CollectedDeer++;
 }
 
-uint8 ADeerToMeCharacter::GetDeersCollected() {
-	return CollectedDeer;
+uint8 ADeerToMeCharacter::GetDeersCollected() 
+{
+	if (CollectedDeer != NULL)
+	{
+		return CollectedDeer;
+	}
+
+	return 0;
 }
 
 void ADeerToMeCharacter::TogglePlayerRun() {

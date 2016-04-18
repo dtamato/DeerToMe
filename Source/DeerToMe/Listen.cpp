@@ -20,6 +20,11 @@ EBTNodeResult::Type UListen::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint
 	{
 		return EBTNodeResult::Failed;
 	}
+	
+	if (OwnerComp.GetBlackboardComponent()->GetValueAsObject(PlayerKey))
+	{
+		return EBTNodeResult::Succeeded;
+	}
 
 	ADeerAIController* NewDeer = Cast<ADeerAIController>(OwnerComp.GetAIOwner());
 	if (NewDeer)
