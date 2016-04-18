@@ -60,13 +60,13 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	// Set a base power level for the character STAMINA
 	InitialStamina = 1000.0f;
 	CharacterStamina = InitialStamina;
+	CurrentDeerState = DeerState::DeerState_Walk;
 
 	// set the dependence of the speed on the power level
-	BaseSpeed = 50.0f;
-	SpeedFactor = 10;
+	BaseSpeed = 1500.0f;
 	RunTimer = 0;
 	MaxRunTime = 4;
-	RunBoost = 100;
+	RunBoost = 1800.0f;
 	ClosestDistance = 1000000;
 	CollectedDeer = 0;
 	EffectsTimer = 0;
@@ -79,8 +79,6 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	MaxEatTime = 2;
 
 	bPlayEffects = false;
-	bIsRunning = false;
-	bIsJumping = false;
 	bCheckJump = false;
 	bCheckRun = false;
 	bIsStarved = false;
@@ -158,19 +156,19 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		}
 	}
 
-	if (bIsEating == true) {
+	if (CurrentDeerState == DeerState::DeerState_Eat) {
 		EatGrass(DeltaTime);
 	}
 
-	if (bIsJumping == true) {
+	if (CurrentDeerState == DeerState::DeerState_Jump) {
 		RunDeerJump(DeltaTime);
 		CheckJump(DeltaTime);
 	}
 
-	if (bIsRunning) {
+	if (CurrentDeerState == DeerState::DeerState_Run) {
 		RunTimer += DeltaTime;
 		if (RunTimer >= MaxRunTime) {
-			bIsRunning = false;
+			ResetCurrentDeerState();
 			RunTimer = 0;
 		}
 	}
@@ -194,7 +192,7 @@ void ADeerToMeCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Loc
 	// jump, but only on the first touch
 	if (FingerIndex == ETouchIndex::Touch1)
 	{
-		bIsJumping = true;
+		CurrentDeerState = DeerState::DeerState_Jump;
 		Jump();
 	}
 }
@@ -221,7 +219,7 @@ void ADeerToMeCharacter::LookUpAtRate(float Rate)
 
 void ADeerToMeCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f) && !bIsEating && !bIsStarved)
+	if ((Controller != NULL) && (Value != 0.0f) && CurrentDeerState != DeerState::DeerState_Eat && !bIsStarved)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -230,7 +228,7 @@ void ADeerToMeCharacter::MoveForward(float Value)
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		if (bIsJumping) { Value *= 0.5; }
+		if (CurrentDeerState == DeerState::DeerState_Jump) { Value *= 0.5; }
 
 		AddMovementInput(Direction, Value);
 
@@ -250,7 +248,7 @@ void ADeerToMeCharacter::MoveForward(float Value)
 
 void ADeerToMeCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) && !bIsEating)
+	if ( (Controller != NULL) && (Value != 0.0f) && CurrentDeerState != DeerState::DeerState_Eat)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -279,7 +277,7 @@ void ADeerToMeCharacter::CollectPickups() {
 			// If the cast is successfula dn the pickup is valid and active
 			if (TestPickup && !TestPickup->IsPendingKill() && TestPickup->IsActive()) {
 				// Set eating boolean to true
-				bIsEating = true;
+				CurrentDeerState = DeerState::DeerState_Eat;
 				// Then call the pickups WasCollected function
 				TestPickup->WasCollected();
 				// Check to see if pickup is battery
@@ -309,16 +307,8 @@ float ADeerToMeCharacter::GetCurrentStamina() {
 	return CharacterStamina;
 }
 
-bool ADeerToMeCharacter::GetIsRunning() {
-	return bIsRunning;
-}
-
-bool ADeerToMeCharacter::GetIsEating() {
-	return bIsEating;
-}
-
-bool ADeerToMeCharacter::GetIsJumping() {
-	return bIsJumping;
+bool ADeerToMeCharacter::GetIsShot() {
+	return bIsShot;
 }
 
 bool ADeerToMeCharacter::GetIsStarving() {
@@ -327,10 +317,6 @@ bool ADeerToMeCharacter::GetIsStarving() {
 
 bool ADeerToMeCharacter::GetGameStarted() {
 	return bGameStarted;
-}
-
-bool ADeerToMeCharacter::GetGameStarted() {
-	return bIsShot;
 }
 
 void ADeerToMeCharacter::SetGameStarted(bool GameState) {
@@ -352,14 +338,29 @@ void ADeerToMeCharacter::SetCurrentUIState(EUI_State NewState) {
 	}
 }
 
-void ADeerToMeCharacter::SetIsShot( bool shotState ) {
-	bIsShot = shotState;
+void ADeerToMeCharacter::ResetCurrentDeerState() {
+	UE_LOG(LogTemp, Warning, TEXT("resetting player UI State"));
+	CurrentDeerState = DeerState::DeerState_Walk;
+}
+
+DeerState ADeerToMeCharacter::GetCurrentDeerState() {
+	return CurrentDeerState;
+}
+
+void ADeerToMeCharacter::SetCurrentDeerState(DeerState NewState) {
+	UE_LOG(LogTemp, Warning, TEXT("Setting player UI State"));
+	CurrentDeerState = NewState;
 }
 
 void ADeerToMeCharacter::ResetCurrentUIState() {
 	UE_LOG(LogTemp, Warning, TEXT("resetting player UI State"));
 	CurrentUIState = EUI_State::EUI_None;
 }
+
+void ADeerToMeCharacter::SetIsShot( bool shotState ) {
+	bIsShot = shotState;
+}
+
 
 void ADeerToMeCharacter::IncreaseDeersCollected() {
 	CollectedDeer++;
@@ -378,9 +379,9 @@ uint8 ADeerToMeCharacter::GetDeersCollected()
 void ADeerToMeCharacter::TogglePlayerRun() {
 	UE_LOG(LogTemp, Warning, TEXT("Toggling Player Speed"));
 	// Check to see if the player still has half their stamina
-	if (CharacterStamina >= (InitialStamina * 0.3f) && !bIsRunning) {
+	if (CharacterStamina >= (InitialStamina * 0.3f) && CurrentDeerState != DeerState::DeerState_Run) {
 		// if they do allow them to run -- countdown in tick -- add in a timed variable
-		bIsRunning = true;
+		CurrentDeerState = DeerState::DeerState_Run;
 		// Decrease their stamina by a quarter
 		CharacterStamina -= (InitialStamina * 0.25f);
 	}	
@@ -393,10 +394,12 @@ void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 	if (CharacterStamina > InitialStamina) { CharacterStamina = InitialStamina; }
 
 	// Chnage speed based on power
-	if (!bIsRunning) {
+	if (CurrentDeerState != DeerState::DeerState_Run) {
+		UE_LOG(LogTemp, Warning, TEXT("Player Walking"));
 		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.1f);
 	}
 	else {
+		UE_LOG(LogTemp, Warning, TEXT("Player Running"));
 		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor + RunBoost;
 	}
 
@@ -416,13 +419,13 @@ void ADeerToMeCharacter::SetStamina(float StaminaToSet)
 
 void ADeerToMeCharacter::StartDeerJump() {
 	if (GetCharacterMovement()->Velocity.Size() <= 5000) {
-		bIsJumping = true;
+		CurrentDeerState = DeerState::DeerState_Jump;
 	}
 }
 
 void ADeerToMeCharacter::StopDeerJump() {
 	bCheckJump = false;
-	bIsJumping = false;
+	ResetCurrentDeerState();
 	StopJumping();
 }
 
@@ -441,7 +444,7 @@ void ADeerToMeCharacter::EatGrass(float DeltaTime) {
 
 	if (EatTimer >= MaxEatTime) {
 		EatTimer = 0;
-		bIsEating = false;
+		ResetCurrentDeerState();
 	}
 }
 

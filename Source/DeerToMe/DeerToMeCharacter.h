@@ -18,9 +18,11 @@ enum class EUI_State {
 	EUI_Lose
 };
 
+UENUM(BlueprintType)
 enum class DeerState {
 
 	DeerState_Run,
+	DeerState_Jump,
 	DeerState_Eat,
 	DeerState_Walk,
 	DeerState_Shot,
@@ -110,15 +112,6 @@ public:
 		float GetCurrentStamina();
 
 	UFUNCTION(BlueprintPure, Category = "Power")
-		bool GetIsRunning();
-
-	UFUNCTION(BlueprintPure, Category = "Power")
-		bool GetIsEating();
-
-	UFUNCTION(BlueprintPure, Category = "Power")
-		bool GetIsJumping();
-
-	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetIsStarving();
 
 	UFUNCTION(BlueprintPure, Category = "Power")
@@ -144,6 +137,18 @@ public:
 	/** Resets the UI state to none */
 	UFUNCTION(BlueprintCallable, Category = "UI")
 		void ResetCurrentUIState();
+
+	/** Returns the current UI state*/
+	UFUNCTION(BlueprintPure, Category = "Deer State")
+		DeerState GetCurrentDeerState();
+
+	/** Sets a new UI state*/
+	UFUNCTION(BlueprintCallable, Category = "Deer State")
+		void SetCurrentDeerState(DeerState NewState);
+
+	/** Resets the UI state to none */
+	UFUNCTION(BlueprintCallable, Category = "Deer State")
+		void ResetCurrentDeerState();
 
 	UFUNCTION()
 	void IncreaseDeersCollected();
@@ -232,15 +237,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float CurrentSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
-		bool bIsRunning;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
-		bool bIsEating;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
-		bool bIsJumping;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
 		bool bIsStarved;
 
@@ -297,6 +293,8 @@ private:
 
 	// Keeps track of the cuurent UI state
 	EUI_State CurrentUIState;
+
+	DeerState CurrentDeerState;
 
 	// For the particle animation
 	UPROPERTY(VisibleAnywhere, Category = "Particles")
