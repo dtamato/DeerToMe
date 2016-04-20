@@ -207,7 +207,10 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 
 	if (CurrentDeerState == DeerState::DeerState_Won) {
 		EndGameDelayTimer += DeltaTime;
+		UE_LOG(LogTemp, Warning, TEXT("Player Winning"));
 		if (EndGameDelayTimer >= EndGameWaitTime) {
+			 FString mapName = GetWorld()->GetMapName();
+			 UE_LOG(LogTemp, Warning, TEXT("CurrentMap: %s"), *mapName);
 			if (GetWorld()->GetMapName() == "UEDPIE_0_4-seasons") {
 				GetWorld()->ServerTravel(FString("/Game/Maps/NEWMAP"));
 			}
@@ -387,12 +390,12 @@ void ADeerToMeCharacter::IncreaseDeersCollected() {
 
 uint8 ADeerToMeCharacter::GetDeersCollected() 
 {
-	if (CollectedDeer != NULL)
-	{
+	//if (CollectedDeer != NULL)
+	//{
 		return CollectedDeer;
-	}
+	//}
 
-	return 0;
+	//return 0;
 }
 
 void ADeerToMeCharacter::TogglePlayerRun() {

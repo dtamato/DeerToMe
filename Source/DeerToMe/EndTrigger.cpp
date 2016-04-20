@@ -57,13 +57,13 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 
 		ADeerToMeCharacter* DeerCharacter = Cast<ADeerToMeCharacter>(OtherActor);
 
-		if (DeerCharacter && DeerCharacter->GetDeersCollected() == deerToCollect) {
+		if (DeerCharacter && DeerCharacter->GetDeersCollected() >= deerToCollect) {
 
 			UE_LOG(LogClass, Warning, TEXT("GOOD JORB MAN"));
 			// UGameplayStatics::OpenLevel()
 			DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
-			// DeerCharacter->SetCurrentDeerState(DeerState::DeerState_Won);
-			// bStartWait = true;
+			DeerCharacter->SetCurrentDeerState(DeerState::DeerState_Won);
+			bStartWait = true;
 
 			if (gameMode != NULL) {
 				gameMode->RemoveUI();
@@ -71,7 +71,7 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 		}
 		else {
 
-			UE_LOG(LogClass, Warning, TEXT("You have collected %i deer. You need %i."), DeerCharacter->GetDeersCollected(), deerToCollect);
+		//	UE_LOG(LogClass, Warning, TEXT("You have collected %i deer. You need %i."), DeerCharacter->GetDeersCollected(), deerToCollect);
 		}
 	}
 }
