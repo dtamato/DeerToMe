@@ -32,6 +32,7 @@ void AEndTrigger::BeginPlay()
 {
 	Super::BeginPlay();
 	gameMode = (ADeerToMeGameMode*)GetWorld()->GetAuthGameMode();
+
 }
 
 // Called every frame
@@ -39,12 +40,15 @@ void AEndTrigger::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	if (bStartWait) {
+	// FString mapName = GetWorld()->GetMapName();
+	// UE_LOG(LogTemp, Warning, TEXT("CurrentMap: %s"), *mapName);
+
+	/*if (bStartWait) {
 		Timer += DeltaTime;
 		if (Timer >= WaitToEnd) {
-			UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+			
 		}
-	}
+	}*/
 }
 
 void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
@@ -54,14 +58,14 @@ void AEndTrigger::OnOverlapBegin(class AActor* OtherActor, class UPrimitiveCompo
 		ADeerToMeCharacter* DeerCharacter = Cast<ADeerToMeCharacter>(OtherActor);
 
 		if (DeerCharacter && DeerCharacter->GetDeersCollected() == deerToCollect) {
-			
+
 			UE_LOG(LogClass, Warning, TEXT("GOOD JORB MAN"));
 			// UGameplayStatics::OpenLevel()
-			// if this is the game level - DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
 			DeerCharacter->SetCurrentUIState(EUI_State::EUI_Win);
-			bStartWait = true;
+			// DeerCharacter->SetCurrentDeerState(DeerState::DeerState_Won);
+			// bStartWait = true;
 
-			if (gameMode != NULL) { 
+			if (gameMode != NULL) {
 				gameMode->RemoveUI();
 			}
 		}

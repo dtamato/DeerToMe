@@ -117,12 +117,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetGameStarted();
 
-	/*UFUNCTION(BlueprintPure, Category = "Health")
-		bool GetIsShot();
-
-	UFUNCTION()
-	void SetIsShot(bool shotState);*/
-
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetGameStarted(bool GameState);
 
@@ -154,7 +148,7 @@ public:
 	void IncreaseDeersCollected();
 
 	UFUNCTION(BlueprintPure, Category = "UI")
-		uint8 GetDeersCollected();
+	uint8 GetDeersCollected();
 
 	UFUNCTION(BlueprintPure, Category = "Particles")
 	class ADeerAI* GetClosestDeer();
@@ -276,8 +270,8 @@ private:
 	UPROPERTY()
 	bool bCheckRun;
 
-	/*UPROPERTY()
-	bool bIsShot;*/
+	UPROPERTY()
+	bool bIsDead;
 
 	UPROPERTY()
 	uint8 CollectedDeer;
