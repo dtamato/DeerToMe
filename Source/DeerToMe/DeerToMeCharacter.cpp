@@ -63,10 +63,11 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	CurrentDeerState = DeerState::DeerState_Walk;
 
 	// set the dependence of the speed on the power level
-	BaseSpeed = 1500.0f;
+	BaseSpeed = 200.0f;
+	SpeedFactor = 700.0f;
 	RunTimer = 0;
 	MaxRunTime = 4;
-	RunBoost = 1800.0f;
+	RunBoost = 800.0f;
 	ClosestDistance = 1000000;
 	CollectedDeer = 0;
 	
@@ -86,6 +87,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	bCheckJump = false;
 	bCheckRun = false;
 	bGameStarted = false;
+	bIsDead = false;
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -141,8 +143,7 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (DeerCall == true)
-	{
-		                
+	{             
 		//Need to make the hit boxes work for overlap with the AI
 		if (num <= 1.0f)
 		{
@@ -189,16 +190,31 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		}
 	}
 
-	if (CharacterStamina <= 0 && CurrentDeerState != DeerState::DeerState_Starved && CurrentDeerState != DeerState::DeerState_Shot) {
+	if (CharacterStamina <= 0 && CurrentDeerState != DeerState::DeerState_Starved && CurrentDeerState != DeerState::DeerState_Shot && bIsDead == false) {
 		SetCurrentUIState(EUI_State::EUI_Starve); 
-		ResetCurrentDeerState();
+		SetCurrentDeerState(DeerState::DeerState_Starved);
+		bIsDead = true;
 	}
 
-	if (CurrentDeerState == DeerState::DeerState_Shot) {
+	if (CurrentDeerState == DeerState::DeerState_Shot || CurrentDeerState == DeerState::DeerState_Starved) {
+		// UE_LOG(LogTemp, Warning, TEXT("Player Dying"));
 		DisableInput(GetWorld()->GetFirstPlayerController());
 		EndGameDelayTimer += DeltaTime;
 		if (EndGameDelayTimer >= EndGameWaitTime) {
 			UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+		}
+	}
+
+	if (CurrentDeerState == DeerState::DeerState_Won) {
+		EndGameDelayTimer += DeltaTime;
+		if (EndGameDelayTimer >= EndGameWaitTime) {
+			if (GetWorld()->GetMapName() == "UEDPIE_0_4-seasons") {
+				GetWorld()->ServerTravel(FString("/Game/Maps/NEWMAP"));
+			}
+			else if (GetWorld()->GetMapName() == "UEDPIE_0_NEWMAP") {
+				UE_LOG(LogTemp, Warning, TEXT("Player Winning"));
+				UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+			}
 		}
 	}
 }
@@ -398,7 +414,7 @@ void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 
 	// Chnage speed based on power
 	if (CurrentDeerState != DeerState::DeerState_Run) {
-		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.1f);
+		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.001f);
 	}
 	else {
 		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor + RunBoost;
