@@ -69,6 +69,7 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	RunBoost = 1800.0f;
 	ClosestDistance = 1000000;
 	CollectedDeer = 0;
+	
 	EffectsTimer = 0;
 	MaxEffectTime = 5;
 
@@ -78,12 +79,13 @@ ADeerToMeCharacter::ADeerToMeCharacter()
 	EatTimer = 0;
 	MaxEatTime = 2;
 
+	EndGameWaitTime = 8;
+	EndGameDelayTimer = 0;
+
 	bPlayEffects = false;
 	bCheckJump = false;
 	bCheckRun = false;
-	bIsStarved = false;
 	bGameStarted = false;
-	bIsShot = false;
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -173,6 +175,12 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		}
 	}
 
+	if (CurrentUIState == EUI_State::EUI_EnterRun) {
+		FollowCamera->PostProcessSettings.bOverride_VignetteIntensity = 1.0f;
+	} else if (CurrentUIState == EUI_State::EUI_ExitRun) {
+		FollowCamera->PostProcessSettings.bOverride_VignetteIntensity = 0.4f;
+	}
+
 	if (bPlayEffects) {
 		EffectsTimer += DeltaTime;
 		if (EffectsTimer >= MaxEffectTime) {
@@ -181,9 +189,17 @@ void ADeerToMeCharacter::Tick(float DeltaTime)
 		}
 	}
 
-	if (CharacterStamina <= 0 && bIsStarved == false && bIsShot == false) { 
+	if (CharacterStamina <= 0 && CurrentDeerState != DeerState::DeerState_Starved && CurrentDeerState != DeerState::DeerState_Shot) {
 		SetCurrentUIState(EUI_State::EUI_Starve); 
-		bIsStarved = true;
+		ResetCurrentDeerState();
+	}
+
+	if (CurrentDeerState == DeerState::DeerState_Shot) {
+		DisableInput(GetWorld()->GetFirstPlayerController());
+		EndGameDelayTimer += DeltaTime;
+		if (EndGameDelayTimer >= EndGameWaitTime) {
+			UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+		}
 	}
 }
 
@@ -219,7 +235,7 @@ void ADeerToMeCharacter::LookUpAtRate(float Rate)
 
 void ADeerToMeCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f) && CurrentDeerState != DeerState::DeerState_Eat && !bIsStarved)
+	if ((Controller != NULL) && (Value != 0.0f) && CurrentDeerState != DeerState::DeerState_Eat && CurrentDeerState != DeerState::DeerState_Starved)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -238,7 +254,7 @@ void ADeerToMeCharacter::MoveForward(float Value)
 			audioComponent->Play();
 		}
 	}
-	else if (Value == 0.0f && bIsShot == false) {
+	else if (Value == 0.0f && CurrentDeerState != DeerState::DeerState_Shot) {
 
 		if (audioComponent->IsPlaying()) {
 			audioComponent->Stop();
@@ -307,14 +323,6 @@ float ADeerToMeCharacter::GetCurrentStamina() {
 	return CharacterStamina;
 }
 
-bool ADeerToMeCharacter::GetIsShot() {
-	return bIsShot;
-}
-
-bool ADeerToMeCharacter::GetIsStarving() {
-	return bIsStarved;
-}
-
 bool ADeerToMeCharacter::GetGameStarted() {
 	return bGameStarted;
 }
@@ -357,11 +365,6 @@ void ADeerToMeCharacter::ResetCurrentUIState() {
 	CurrentUIState = EUI_State::EUI_None;
 }
 
-void ADeerToMeCharacter::SetIsShot( bool shotState ) {
-	bIsShot = shotState;
-}
-
-
 void ADeerToMeCharacter::IncreaseDeersCollected() {
 	CollectedDeer++;
 }
@@ -395,16 +398,11 @@ void ADeerToMeCharacter::UpdateStamina(float StanimaChange) {
 
 	// Chnage speed based on power
 	if (CurrentDeerState != DeerState::DeerState_Run) {
-		UE_LOG(LogTemp, Warning, TEXT("Player Walking"));
 		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor * (CharacterStamina * 0.1f);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Player Running"));
 		GetCharacterMovement()->MaxWalkSpeed = BaseSpeed + SpeedFactor + RunBoost;
 	}
-
-	// UE_LOG(LogTemp, Warning, TEXT("Player Max Speed %f"), GetCharacterMovement()->MaxWalkSpeed);
-	// Call visual effect, audio and animation
 }
 
 void ADeerToMeCharacter::RefillStamina() {

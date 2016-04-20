@@ -22,7 +22,7 @@ AEndTrigger::AEndTrigger()
 	// gameMode = Cast<ADeerToMeGameMode>(GetWorld()->GetAuthGameMode());
 	// AGameMode* tempGameMode = GetWorld()->GetAuthGameMode();
 
-	WaitToEnd = 3;
+	WaitToEnd = 4;
 	Timer = 0;
 	bStartWait = false;
 }
@@ -42,7 +42,7 @@ void AEndTrigger::Tick( float DeltaTime )
 	if (bStartWait) {
 		Timer += DeltaTime;
 		if (Timer >= WaitToEnd) {
-			GetWorld()->ServerTravel(FString("/Game/Maps/NEWMAP"));
+			UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 		}
 	}
 }

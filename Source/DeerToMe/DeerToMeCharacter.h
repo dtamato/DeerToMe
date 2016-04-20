@@ -111,17 +111,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Power")
 		float GetCurrentStamina();
 
-	UFUNCTION(BlueprintPure, Category = "Power")
-		bool GetIsStarving();
+	/*UFUNCTION(BlueprintPure, Category = "Power")
+		bool GetIsStarving();*/
 
 	UFUNCTION(BlueprintPure, Category = "Power")
 		bool GetGameStarted();
 
-	UFUNCTION(BlueprintPure, Category = "Health")
+	/*UFUNCTION(BlueprintPure, Category = "Health")
 		bool GetIsShot();
 
 	UFUNCTION()
-	void SetIsShot(bool shotState);
+	void SetIsShot(bool shotState);*/
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetGameStarted(bool GameState);
@@ -237,8 +237,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float CurrentSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
-		bool bIsStarved;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
+		bool bIsStarved;*/
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Power", Meta = (BlueprintProtected = "true"))
 		bool bGameStarted;
@@ -255,6 +255,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 		float MaxRunTime;
 
+	UPROPERTY(EditDefaultsOnly)
+		float EndGameDelayTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+		float EndGameWaitTime;
+
 private:
 
 	// Current poweer level of the character
@@ -270,8 +276,8 @@ private:
 	UPROPERTY()
 	bool bCheckRun;
 
-	UPROPERTY()
-	bool bIsShot;
+	/*UPROPERTY()
+	bool bIsShot;*/
 
 	UPROPERTY()
 	uint8 CollectedDeer;
